@@ -29,9 +29,7 @@ import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.*
 
 enum class ModelType {
     Lightning,
@@ -166,7 +164,69 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         }
         lastInferenceTimeNanos =
             SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
-        return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
+
+        val leftAlbowAngle = getAngle(keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
+            keyPoints[BodyPart.LEFT_ELBOW.ordinal].coordinate,
+            keyPoints[BodyPart.LEFT_WRIST.ordinal].coordinate)
+
+        val rightAlbowAngle = getAngle(keyPoints[BodyPart.RIGHT_SHOULDER.ordinal].coordinate,
+            keyPoints[BodyPart.RIGHT_ELBOW.ordinal].coordinate,
+            keyPoints[BodyPart.RIGHT_WRIST.ordinal].coordinate)
+
+        val leftShoulderAngle = getAngle(keyPoints[BodyPart.LEFT_ELBOW.ordinal].coordinate,
+            keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
+            keyPoints[BodyPart.LEFT_HIP.ordinal].coordinate)
+
+        val rightShoulderAngle = getAngle(keyPoints[BodyPart.RIGHT_ELBOW.ordinal].coordinate,
+            keyPoints[BodyPart.RIGHT_SHOULDER.ordinal].coordinate,
+            keyPoints[BodyPart.RIGHT_HIP.ordinal].coordinate)
+
+        val leftHipAngle = getAngle(keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
+            keyPoints[BodyPart.LEFT_HIP.ordinal].coordinate,
+            keyPoints[BodyPart.LEFT_KNEE.ordinal].coordinate)
+
+        val rightHipAngle = getAngle(keyPoints[BodyPart.RIGHT_SHOULDER.ordinal].coordinate,
+            keyPoints[BodyPart.RIGHT_HIP.ordinal].coordinate,
+            keyPoints[BodyPart.RIGHT_KNEE.ordinal].coordinate)
+
+        val leftKneeAngle = getAngle(keyPoints[BodyPart.LEFT_HIP.ordinal].coordinate,
+            keyPoints[BodyPart.LEFT_KNEE.ordinal].coordinate,
+            keyPoints[BodyPart.LEFT_ANKLE.ordinal].coordinate)
+
+        val rightKneeAngle = getAngle(keyPoints[BodyPart.RIGHT_HIP.ordinal].coordinate,
+            keyPoints[BodyPart.RIGHT_KNEE.ordinal].coordinate,
+            keyPoints[BodyPart.RIGHT_ANKLE.ordinal].coordinate)
+
+        /** 각 자세 인스턴스 생성*/
+        val pose_address = VowlingPose(90.0, 0.0, 160.0, 160.0)
+        val pose_pushaway = VowlingPose(105.0, 15.0, 150.0, 150.0, 150.0)
+        val pose_downswing = VowlingPose(180.0, 10.0, 170.0, 150.0, 150.0)
+        val pose_backswing = VowlingPose(180.0, 90.0, 110.0, 130.0, 130.0)
+        val pose_forwardswing = VowlingPose(180.0, 30.0, 175.0, 170.0, 80.0)
+        val pose_followthrough = VowlingPose(160.0, 160.0, 175.0, 180.0, 100.0)
+
+        /** 각 자세 점수*/
+        val addressScore = pose_address.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle)
+        val pushawayScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+        val downswingScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+        val backswingScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+        val forwardswingScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+        val followthroughScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+
+        var scoreArray = arrayOf(addressScore.toFloat(), pushawayScore.toFloat(), downswingScore.toFloat(),
+            backswingScore.toFloat(), forwardswingScore.toFloat(), followthroughScore.toFloat())
+
+        return listOf(Person(keyPoints = keyPoints, score = scoreArray[0]))
+//        return listOf(Person(keyPoints = keyPoints, score = scoreArray))
+//        return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
+    }
+
+    fun getAngle(a1: PointF, a2: PointF, a3: PointF): Double {
+        val p1: Double = hypot(((a1.x) - (a2.x)).toDouble(), ((a1.y) - (a2.y)).toDouble())
+        val p2: Double = hypot(((a2.x) - (a3.x)).toDouble(), ((a2.y) - (a3.y)).toDouble())
+        val p3: Double = hypot(((a3.x) - (a1.x)).toDouble(), ((a3.y) - (a1.y)).toDouble())
+        val radian: Double = acos((p1 * p1 + p2 * p2 - p3 * p3) / (2 * p1 * p2))
+        return radian / PI * 180
     }
 
     override fun lastInferenceTimeNanos(): Long = lastInferenceTimeNanos
@@ -223,6 +283,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             yMin + height
         )
     }
+
 
     /**
      * Checks whether there are enough torso keypoints.

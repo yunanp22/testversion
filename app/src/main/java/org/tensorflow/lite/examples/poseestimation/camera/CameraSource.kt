@@ -36,10 +36,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.tensorflow.lite.examples.poseestimation.VisualizationUtils
 import org.tensorflow.lite.examples.poseestimation.YuvToRgbConverter
 import org.tensorflow.lite.examples.poseestimation.data.Person
-//import org.tensorflow.lite.examples.poseestimation.ml.MoveNetMultiPose
-//import org.tensorflow.lite.examples.poseestimation.ml.PoseClassifier
 import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
-//import org.tensorflow.lite.examples.poseestimation.ml.TrackerType
 import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -187,24 +184,6 @@ class CameraSource(
         }
     }
 
-//    fun setClassifier(classifier: PoseClassifier?) {
-//        synchronized(lock) {
-//            if (this.classifier != null) {
-//                this.classifier?.close()
-//                this.classifier = null
-//            }
-//            this.classifier = classifier
-//        }
-//    }
-
-    /**
-     * Set Tracker for Movenet MuiltiPose model.
-     */
-//    fun setTracker(trackerType: TrackerType) {
-//        isTrackerEnabled = trackerType != TrackerType.OFF
-//        (this.detector as? MoveNetMultiPose)?.setTracker(trackerType)
-//    }
-
     fun resume() {
         imageReaderThread = HandlerThread("imageReaderThread").apply { start() }
         imageReaderHandler = Handler(imageReaderThread!!.looper)
@@ -231,8 +210,6 @@ class CameraSource(
         stopImageReaderThread()
         detector?.close()
         detector = null
-//        classifier?.close()
-//        classifier = null
         fpsTimer?.cancel()
         fpsTimer = null
         frameProcessedInOneSecondInterval = 0
@@ -247,13 +224,6 @@ class CameraSource(
         synchronized(lock) {
             detector?.estimatePoses(bitmap)?.let {
                 persons.addAll(it)
-
-                // if the model only returns one item, allow running the Pose classifier.
-//                if (persons.isNotEmpty()) {
-//                    classifier?.run {
-//                        classificationResult = classify(persons[0])
-//                    }
-//                }
             }
         }
         frameProcessedInOneSecondInterval++

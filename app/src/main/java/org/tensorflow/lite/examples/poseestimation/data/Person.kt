@@ -16,9 +16,10 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.poseestimation.data
 
+import org.tensorflow.lite.examples.poseestimation.data.KeyPoint
 import android.graphics.RectF
+import android.graphics.PointF
 import kotlin.math.*
-import org.tensorflow.lite.examples.poseestimation.data.Person
 
 data class Person(
     var id: Int = -1, // default id is -1
@@ -26,3 +27,4 @@ data class Person(
     val boundingBox: RectF? = null, // Only MoveNet MultiPose return bounding box.
     val score: Float
 )
+
