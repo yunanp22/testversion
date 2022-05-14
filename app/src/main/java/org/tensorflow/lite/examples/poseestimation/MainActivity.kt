@@ -21,9 +21,11 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.pm.PackageManager
 import android.icu.text.MessageFormat.format
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Process
 import android.view.SurfaceView
+import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -48,6 +50,17 @@ class MainActivity : AppCompatActivity() {
     /** A [SurfaceView] for camera preview.   */
     private lateinit var surfaceView: SurfaceView
 
+    private var num1 : MediaPlayer? = null
+    private var num2 : MediaPlayer? = null
+    private var num3 : MediaPlayer? = null
+    private var num4 : MediaPlayer? = null
+    private var num5 : MediaPlayer? = null
+    private var address : MediaPlayer? = null
+    private var push : MediaPlayer? = null
+    private var down : MediaPlayer? = null
+    private var back : MediaPlayer? = null
+    private var forward : MediaPlayer? = null
+    private var follow : MediaPlayer? = null
 
     /** Default device is CPU */
     private var device = Device.CPU
@@ -55,6 +68,7 @@ class MainActivity : AppCompatActivity() {
     private var timerTask: Timer? = null
     private var time = 0
 
+    private lateinit var imgPose: ImageView
     private lateinit var tvScore: TextView
     private lateinit var tvTime: TextView
     private lateinit var tvFPS: TextView
@@ -92,6 +106,7 @@ class MainActivity : AppCompatActivity() {
         tvPoseName = findViewById(R.id.tvPoseName)
 //        tvTracker = findViewById(R.id.tvTracker)
         surfaceView = findViewById(R.id.surfaceView)
+        imgPose = findViewById(R.id.imgPose)
 
         if (!isCameraPermissionGranted()) {
             requestPermission()
@@ -125,27 +140,76 @@ class MainActivity : AppCompatActivity() {
 
     // open camera
     private fun openCamera() {
+        num1 = MediaPlayer.create(this, R.raw.one)
+        num2 = MediaPlayer.create(this, R.raw.two)
+        num3 = MediaPlayer.create(this, R.raw.three)
+        num4 = MediaPlayer.create(this, R.raw.four)
+        num5 = MediaPlayer.create(this, R.raw.five)
+        address = MediaPlayer.create(this, R.raw.address)
+        push = MediaPlayer.create(this, R.raw.push_away)
+        back = MediaPlayer.create(this, R.raw.back_swing)
+        follow = MediaPlayer.create(this, R.raw.follow_throw)
+        forward = MediaPlayer.create(this, R.raw.forward)
+        down = MediaPlayer.create(this, R.raw.down_swing)
+
+        imgPose.setImageResource(R.drawable.tfl2_logo)
 
         timerTask = kotlin.concurrent.timer(period = 100) {
             time ++
             val sec = time/10
+            val fiveSec = time%50
+            if(fiveSec == 10 && sec<=30) {
+                num4?.start()
+            }else if(fiveSec == 20 && sec<=30){
+                num3?.start()
+            }else if(fiveSec == 30 && sec<=30){
+                num2?.start()
+            }else if(fiveSec == 40 && sec<=30){
+                num1?.start()
+            }
+
+            if(sec == 0){
+                address?.start()
+                imgPose.visibility = View.INVISIBLE
+            }
+            if(sec == 5){
+                push?.start()
+                imgPose.visibility = View.VISIBLE
+            }
+            if(sec == 10){
+                down?.start()
+            }
+            if(sec == 15){
+                back?.start()
+            }
+            if(sec == 20){
+                forward?.start()
+            }
+            if(sec == 25){
+                follow?.start()
+            }
+/*
+            if(sec <= 5) {
+                positionOfTime = pose_address
+            } else if (sec <= 10) {
+                positionOfTime = pose_pushaway
+            } else if (sec <= 15) {
+                positionOfTime = pose_downswing
+            } else if (sec <= 20) {
+                positionOfTime = pose_backswing
+            } else if (sec <= 25) {
+                positionOfTime = pose_forwardswing
+            } else if (sec <= 30) {
+                positionOfTime = pose_followthrough
+            }*/
+
             runOnUiThread {
                 tvTime?.text = "시간: ${sec}"
             }
         }
-        /*
-        num1 = MediaPlayer.create(this.context, R.raw.one)
-        num2 = MediaPlayer.create(this.context, R.raw.two)
-        num3 = MediaPlayer.create(this.context, R.raw.three)
-        num4 = MediaPlayer.create(this.context, R.raw.four)
-        num5 = MediaPlayer.create(this.context, R.raw.five)
-        address = MediaPlayer.create(this.context, R.raw.address)
-        push = MediaPlayer.create(this.context, R.raw.push_away)
-        back = MediaPlayer.create(this.context, R.raw.back_swing)
-        follow = MediaPlayer.create(this.context, R.raw.follow_throw)
-        forward = MediaPlayer.create(this.context, R.raw.forward)
-        down = MediaPlayer.create(this.context, R.raw.down_swing)
-        */
+
+
+
 
 
 
