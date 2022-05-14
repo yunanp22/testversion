@@ -20,6 +20,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.pm.PackageManager
+import android.icu.text.MessageFormat.format
 import android.os.Bundle
 import android.os.Process
 import android.view.SurfaceView
@@ -35,6 +36,9 @@ import kotlinx.coroutines.launch
 import org.tensorflow.lite.examples.poseestimation.camera.CameraSource
 import org.tensorflow.lite.examples.poseestimation.data.Device
 import org.tensorflow.lite.examples.poseestimation.ml.*
+import java.lang.String.format
+import java.text.MessageFormat.format
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -48,7 +52,11 @@ class MainActivity : AppCompatActivity() {
     /** Default device is CPU */
     private var device = Device.CPU
 
+    private var timerTask: Timer? = null
+    private var time = 0
+
     private lateinit var tvScore: TextView
+    private lateinit var tvTime: TextView
     private lateinit var tvFPS: TextView
     private lateinit var tvPoseName: TextView
     private var cameraSource: CameraSource? = null
@@ -78,6 +86,7 @@ class MainActivity : AppCompatActivity() {
         // keep screen on while app is running
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         tvScore = findViewById(R.id.tvScore)
+        tvTime = findViewById(R.id.tvTime)
         tvFPS = findViewById(R.id.tvFps)
 //        tvModel = findViewById(R.id.tvModel)
         tvPoseName = findViewById(R.id.tvPoseName)
@@ -116,6 +125,30 @@ class MainActivity : AppCompatActivity() {
 
     // open camera
     private fun openCamera() {
+
+        timerTask = kotlin.concurrent.timer(period = 100) {
+            time ++
+            val sec = time/10
+            runOnUiThread {
+                tvTime?.text = "시간: ${sec}"
+            }
+        }
+        /*
+        num1 = MediaPlayer.create(this.context, R.raw.one)
+        num2 = MediaPlayer.create(this.context, R.raw.two)
+        num3 = MediaPlayer.create(this.context, R.raw.three)
+        num4 = MediaPlayer.create(this.context, R.raw.four)
+        num5 = MediaPlayer.create(this.context, R.raw.five)
+        address = MediaPlayer.create(this.context, R.raw.address)
+        push = MediaPlayer.create(this.context, R.raw.push_away)
+        back = MediaPlayer.create(this.context, R.raw.back_swing)
+        follow = MediaPlayer.create(this.context, R.raw.follow_throw)
+        forward = MediaPlayer.create(this.context, R.raw.forward)
+        down = MediaPlayer.create(this.context, R.raw.down_swing)
+        */
+
+
+
         if (isCameraPermissionGranted()) {
             if (cameraSource == null) {
                 cameraSource =
@@ -127,6 +160,7 @@ class MainActivity : AppCompatActivity() {
                         override fun onDetectedInfo(
                             personScore: Float?,
                             poseLabels: List<Pair<String, Float>>?
+
                         ) {
                             tvScore.text = getString(R.string.tfe_pe_tv_score, personScore ?: 0f)
                         }
