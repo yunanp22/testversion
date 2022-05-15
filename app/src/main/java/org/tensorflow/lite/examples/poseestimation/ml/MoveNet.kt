@@ -19,8 +19,10 @@ package org.tensorflow.lite.examples.poseestimation.ml
 import android.content.Context
 import android.graphics.*
 import android.os.SystemClock
+import android.widget.Toast
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.examples.poseestimation.MainActivity
 import org.tensorflow.lite.examples.poseestimation.data.*
 import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
@@ -29,6 +31,7 @@ import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import java.util.*
 import kotlin.math.*
 
 enum class ModelType {
@@ -88,8 +91,12 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
     private val inputWidth = interpreter.getInputTensor(0).shape()[1]
     private val inputHeight = interpreter.getInputTensor(0).shape()[2]
     private var outputShape: IntArray = interpreter.getOutputTensor(0).shape()
+    private var time = 0
+    private var timerTask: Timer? = null
 
-    override fun estimatePoses(bitmap: Bitmap): List<Person> {
+
+//    override fun estimatePoses(bitmap: Bitmap): List<Person> {
+override fun estimatePoses(bitmap: Bitmap, poseNum: Int): List<Person> {
         val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         if (cropRegion == null) {
             cropRegion = initRectF(bitmap.width, bitmap.height)
@@ -165,25 +172,26 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         lastInferenceTimeNanos =
             SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
 
-        val leftAlbowAngle = getAngle(keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
-            keyPoints[BodyPart.LEFT_ELBOW.ordinal].coordinate,
-            keyPoints[BodyPart.LEFT_WRIST.ordinal].coordinate)
+        /** 부위별 각도*/
+//        val leftAlbowAngle = getAngle(keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
+//            keyPoints[BodyPart.LEFT_ELBOW.ordinal].coordinate,
+//            keyPoints[BodyPart.LEFT_WRIST.ordinal].coordinate)
 
         val rightAlbowAngle = getAngle(keyPoints[BodyPart.RIGHT_SHOULDER.ordinal].coordinate,
             keyPoints[BodyPart.RIGHT_ELBOW.ordinal].coordinate,
             keyPoints[BodyPart.RIGHT_WRIST.ordinal].coordinate)
 
-        val leftShoulderAngle = getAngle(keyPoints[BodyPart.LEFT_ELBOW.ordinal].coordinate,
-            keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
-            keyPoints[BodyPart.LEFT_HIP.ordinal].coordinate)
+//        val leftShoulderAngle = getAngle(keyPoints[BodyPart.LEFT_ELBOW.ordinal].coordinate,
+//            keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
+//            keyPoints[BodyPart.LEFT_HIP.ordinal].coordinate)
 
         val rightShoulderAngle = getAngle(keyPoints[BodyPart.RIGHT_ELBOW.ordinal].coordinate,
             keyPoints[BodyPart.RIGHT_SHOULDER.ordinal].coordinate,
             keyPoints[BodyPart.RIGHT_HIP.ordinal].coordinate)
 
-        val leftHipAngle = getAngle(keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
-            keyPoints[BodyPart.LEFT_HIP.ordinal].coordinate,
-            keyPoints[BodyPart.LEFT_KNEE.ordinal].coordinate)
+//        val leftHipAngle = getAngle(keyPoints[BodyPart.LEFT_SHOULDER.ordinal].coordinate,
+//            keyPoints[BodyPart.LEFT_HIP.ordinal].coordinate,
+//            keyPoints[BodyPart.LEFT_KNEE.ordinal].coordinate)
 
         val rightHipAngle = getAngle(keyPoints[BodyPart.RIGHT_SHOULDER.ordinal].coordinate,
             keyPoints[BodyPart.RIGHT_HIP.ordinal].coordinate,
@@ -213,13 +221,23 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         val forwardswingScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
         val followthroughScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
 
-        var scoreArray = arrayOf(addressScore.toFloat(), pushawayScore.toFloat(), downswingScore.toFloat(),
-            backswingScore.toFloat(), forwardswingScore.toFloat(), followthroughScore.toFloat())
-
-        return listOf(Person(keyPoints = keyPoints, score = scoreArray[0]))
-//        return listOf(Person(keyPoints = keyPoints, score = scoreArray))
+        if(poseNum==1)
+            return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
+        else if(poseNum==2)
+            return listOf(Person(keyPoints = keyPoints, score = pushawayScore.toFloat()))
+        else if(poseNum==2)
+            return listOf(Person(keyPoints = keyPoints, score = downswingScore.toFloat()))
+        else if(poseNum==2)
+            return listOf(Person(keyPoints = keyPoints, score = backswingScore.toFloat()))
+        else if(poseNum==2)
+            return listOf(Person(keyPoints = keyPoints, score = forwardswingScore.toFloat()))
+        else{
+            return listOf(Person(keyPoints = keyPoints, score = followthroughScore.toFloat()))
+        }
+//        return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
 //        return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
     }
+
 
     fun getAngle(a1: PointF, a2: PointF, a3: PointF): Double {
         val p1: Double = hypot(((a1.x) - (a2.x)).toDouble(), ((a1.y) - (a2.y)).toDouble())

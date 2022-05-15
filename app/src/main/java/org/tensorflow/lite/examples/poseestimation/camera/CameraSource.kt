@@ -32,7 +32,10 @@ import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
 import android.view.SurfaceView
+import android.view.View
+import android.widget.Toast
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.tensorflow.lite.examples.poseestimation.R
 import org.tensorflow.lite.examples.poseestimation.VisualizationUtils
 import org.tensorflow.lite.examples.poseestimation.YuvToRgbConverter
 import org.tensorflow.lite.examples.poseestimation.data.Person
@@ -147,6 +150,8 @@ class CameraSource(
     private suspend fun openCamera(manager: CameraManager, cameraId: String): CameraDevice =
         suspendCancellableCoroutine { cont ->
             manager.openCamera(cameraId, object : CameraDevice.StateCallback() {
+
+
                 override fun onOpened(camera: CameraDevice) = cont.resume(camera)
 
                 override fun onDisconnected(camera: CameraDevice) {
@@ -220,10 +225,42 @@ class CameraSource(
     private fun processImage(bitmap: Bitmap) {
         val persons = mutableListOf<Person>()
         val classificationResult: List<Pair<String, Float>>? = null
-
+//        var framesPerSecond = time/10
+//        synchronized(lock) {
+//            detector?.estimatePoses(bitmap, 1)?.let {
+//                persons.addAll(it)
+//            }
+//        }
         synchronized(lock) {
-            detector?.estimatePoses(bitmap)?.let {
-                persons.addAll(it)
+            if(framesPerSecond<7){
+                detector?.estimatePoses(bitmap, 1)?.let {
+                    persons.addAll(it)
+                }
+            }
+            if(framesPerSecond<14){
+                detector?.estimatePoses(bitmap, 2)?.let {
+                    persons.addAll(it)
+                }
+            }
+            if(framesPerSecond<21){
+                detector?.estimatePoses(bitmap, 3)?.let {
+                    persons.addAll(it)
+                }
+            }
+            if(framesPerSecond<28){
+                detector?.estimatePoses(bitmap, 4)?.let {
+                    persons.addAll(it)
+                }
+            }
+            if(framesPerSecond<35){
+                detector?.estimatePoses(bitmap, 5)?.let {
+                    persons.addAll(it)
+                }
+            }
+            if(framesPerSecond<42){
+                detector?.estimatePoses(bitmap, 6)?.let {
+                    persons.addAll(it)
+                }
             }
         }
         frameProcessedInOneSecondInterval++

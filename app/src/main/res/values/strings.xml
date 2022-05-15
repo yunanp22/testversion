@@ -3,29 +3,17 @@
     <string name="tfe_pe_request_permission">This app needs camera permission.</string>
     <string name="tfe_pe_tv_score">자세 점수 : %.2f</string>
     <string name="tfe_pe_tv_time">시간 : %d</string>
-    <string name="tfe_pe_tv_model">Model: Movenet Lightning </string>
+<!--    <string name="tfe_pe_tv_model">Model: Movenet Lightning </string>-->
     <string name="tfe_pe_tv_fps">Fps : %d</string>
-    <string name="tfe_pe_tv_poseName">자세 : 어드레스</string>
-    <string name="tfe_pe_tv_classification_value">- %s</string>
-    <string name="tfe_pe_tv_pose_classification">Pose Classification</string>
-    <string name="tfe_pe_tv_tracking">Tracker: </string>
-    <string name="tfe_pe_gpu_error">Movenet MultiPose does not support GPU. Fallback to CPU.</string>
-    <string-array name="tfe_pe_models_array">
-<!--        <item>Movenet Lightning</item>-->
-<!--        <item>Movenet Thunder</item>-->
-<!--        <item>Movenet MultiPose</item>-->
-<!--        <item>Posenet</item>-->
-    </string-array>
+    <string name="tfe_pe_tv_poseName">자세: %s</string>
 
-    <string-array name="tfe_pe_device_name">
-        <item>CPU</item>
-        <item>GPU</item>
-        <item>NNAPI</item>
-    </string-array>
+<!--    <string-array name="tfe_pe_tv_PoseName">-->
+<!--        <item>Address</item>-->
+<!--        <item>PushAway</item>-->
+<!--        <item>DownSwing</item>-->
+<!--        <item>BackSwing</item>-->
+<!--        <item>ForwardSwing</item>-->
+<!--        <item>FollowThrough</item>-->
+<!--    </string-array>-->
 
-    <string-array name="tfe_pe_tracker_array">
-        <item>Off</item>
-        <item>BoundingBox</item>
-        <item>Keypoint</item>
-    </string-array>
 </resources>
