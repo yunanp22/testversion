@@ -91,8 +91,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
     private val inputWidth = interpreter.getInputTensor(0).shape()[1]
     private val inputHeight = interpreter.getInputTensor(0).shape()[2]
     private var outputShape: IntArray = interpreter.getOutputTensor(0).shape()
-    private var time = 0
-    private var timerTask: Timer? = null
 
 
 //    override fun estimatePoses(bitmap: Bitmap): List<Person> {
@@ -216,20 +214,20 @@ override fun estimatePoses(bitmap: Bitmap, poseNum: Int): List<Person> {
         /** 각 자세 점수*/
         val addressScore = pose_address.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle)
         val pushawayScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
-        val downswingScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
-        val backswingScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
-        val forwardswingScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
-        val followthroughScore = pose_pushaway.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+        val downswingScore = pose_downswing.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+        val backswingScore = pose_backswing.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+        val forwardswingScore = pose_forwardswing.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
+        val followthroughScore = pose_followthrough.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
 
         if(poseNum==1)
             return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
         else if(poseNum==2)
             return listOf(Person(keyPoints = keyPoints, score = pushawayScore.toFloat()))
-        else if(poseNum==2)
+        else if(poseNum==3)
             return listOf(Person(keyPoints = keyPoints, score = downswingScore.toFloat()))
-        else if(poseNum==2)
+        else if(poseNum==4)
             return listOf(Person(keyPoints = keyPoints, score = backswingScore.toFloat()))
-        else if(poseNum==2)
+        else if(poseNum==5)
             return listOf(Person(keyPoints = keyPoints, score = forwardswingScore.toFloat()))
         else{
             return listOf(Person(keyPoints = keyPoints, score = followthroughScore.toFloat()))

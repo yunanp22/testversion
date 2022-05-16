@@ -66,9 +66,8 @@ class MainActivity : AppCompatActivity() {
     /** Default device is CPU */
     private var device = Device.CPU
 
-    private var timerTask: Timer? = null
-    private var time = 0
-    var poseArray = arrayOf("Address", "PushAway", "DownSwing", "BackSwing", "ForwardSwing", "FollowThrough")
+    var timerTask: Timer? = null
+    var time = 0
 
     private lateinit var imgPose: ImageView
     private lateinit var tvScore: TextView

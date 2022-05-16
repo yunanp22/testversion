@@ -198,6 +198,39 @@ class CameraSource(
                 override fun run() {
                     framesPerSecond = frameProcessedInOneSecondInterval
                     frameProcessedInOneSecondInterval = 0
+
+//                    synchronized(lock) {
+//                        if(framesPerSecond==0){
+//                            detector?.estimatePoses(bitmap, 1)?.let {
+//                                persons.addAll(it)
+//                            }
+//                        }
+//                        if(framesPerSecond==7){
+//                            detector?.estimatePoses(bitmap, 2)?.let {
+//                                persons.addAll(it)
+//                            }
+//                        }
+//                        if(framesPerSecond==14){
+//                            detector?.estimatePoses(bitmap, 3)?.let {
+//                                persons.addAll(it)
+//                            }
+//                        }
+//                        if(framesPerSecond==21){
+//                            detector?.estimatePoses(bitmap, 4)?.let {
+//                                persons.addAll(it)
+//                            }
+//                        }
+//                        if(framesPerSecond==28){
+//                            detector?.estimatePoses(bitmap, 5)?.let {
+//                                persons.addAll(it)
+//                            }
+//                        }
+//                        if(framesPerSecond==35){
+//                            detector?.estimatePoses(bitmap, 6)?.let {
+//                                persons.addAll(it)
+//                            }
+//                        }
+//                    }
                 }
             },
             0,
@@ -225,44 +258,44 @@ class CameraSource(
     private fun processImage(bitmap: Bitmap) {
         val persons = mutableListOf<Person>()
         val classificationResult: List<Pair<String, Float>>? = null
-//        var framesPerSecond = time/10
-//        synchronized(lock) {
-//            detector?.estimatePoses(bitmap, 1)?.let {
-//                persons.addAll(it)
-//            }
-//        }
+
         synchronized(lock) {
-            if(framesPerSecond<7){
-                detector?.estimatePoses(bitmap, 1)?.let {
-                    persons.addAll(it)
-                }
-            }
-            if(framesPerSecond<14){
-                detector?.estimatePoses(bitmap, 2)?.let {
-                    persons.addAll(it)
-                }
-            }
-            if(framesPerSecond<21){
-                detector?.estimatePoses(bitmap, 3)?.let {
-                    persons.addAll(it)
-                }
-            }
-            if(framesPerSecond<28){
-                detector?.estimatePoses(bitmap, 4)?.let {
-                    persons.addAll(it)
-                }
-            }
-            if(framesPerSecond<35){
-                detector?.estimatePoses(bitmap, 5)?.let {
-                    persons.addAll(it)
-                }
-            }
-            if(framesPerSecond<42){
-                detector?.estimatePoses(bitmap, 6)?.let {
-                    persons.addAll(it)
-                }
+            detector?.estimatePoses(bitmap, 1)?.let {
+                persons.addAll(it)
             }
         }
+//        synchronized(lock) {
+//            if(framesPerSecond==0){
+//                detector?.estimatePoses(bitmap, 1)?.let {
+//                    persons.addAll(it)
+//                }
+//            }
+//            if(framesPerSecond==7){
+//                detector?.estimatePoses(bitmap, 2)?.let {
+//                    persons.addAll(it)
+//                }
+//            }
+//            if(framesPerSecond==14){
+//                detector?.estimatePoses(bitmap, 3)?.let {
+//                    persons.addAll(it)
+//                }
+//            }
+//            if(framesPerSecond==21){
+//                detector?.estimatePoses(bitmap, 4)?.let {
+//                    persons.addAll(it)
+//                }
+//            }
+//            if(framesPerSecond==28){
+//                detector?.estimatePoses(bitmap, 5)?.let {
+//                    persons.addAll(it)
+//                }
+//            }
+//            if(framesPerSecond==35){
+//                detector?.estimatePoses(bitmap, 6)?.let {
+//                    persons.addAll(it)
+//                }
+//            }
+//        }
         frameProcessedInOneSecondInterval++
         if (frameProcessedInOneSecondInterval == 1) {
             // send fps to view
