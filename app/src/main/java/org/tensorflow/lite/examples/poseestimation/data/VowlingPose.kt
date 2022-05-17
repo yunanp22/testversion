@@ -8,6 +8,7 @@ class VowlingPose {
     var correctRightHipAngle: Double = 0.0
     var correctRightKneeAngle: Double = 0.0
     var correctLeftKneeAngle: Double = 0.0
+    var biggestScore: Double = 0.0
 
     constructor(correctRightElbowAngle: Double, correctRightShoulderAngle: Double,
                 correctRightHipAngle: Double, correctRightKneeAngle: Double){

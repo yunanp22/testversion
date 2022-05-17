@@ -25,6 +25,7 @@ import android.location.Address
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Process
+import android.util.Log
 import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
@@ -68,6 +69,8 @@ class MainActivity : AppCompatActivity() {
 
     var timerTask: Timer? = null
     var time = 0
+
+
 
     private lateinit var imgPose: ImageView
     private lateinit var tvScore: TextView
@@ -156,78 +159,97 @@ class MainActivity : AppCompatActivity() {
 //        tvPoseName.setText(String.format(getString(R.string.tfe_pe_tv_poseName, poseArray[1])))
 
         timerTask = kotlin.concurrent.timer(period = 100) {
-            time ++
-            val sec = time/10
-            val fiveSec = time%70
-            if(fiveSec == 14 && sec<=42) {
+            time++
+            val sec = time / 10
+            val fiveSec = time % 70
+            if (fiveSec == 14 && sec <= 42) {
                 num4?.start()
-            }else if(fiveSec == 28 && sec<=42){
+            } else if (fiveSec == 28 && sec <= 42) {
                 num3?.start()
-            }else if(fiveSec == 42 && sec<=42){
+            } else if (fiveSec == 42 && sec <= 42) {
                 num2?.start()
-            }else if(fiveSec == 56 && sec<=42){
+            } else if (fiveSec == 56 && sec <= 42) {
                 num1?.start()
             }
 
             runOnUiThread {
                 tvTime?.text = "시간: ${sec}"
-                if(sec == 0){
+                if (sec == 0) {
                     address?.start()
                     imgPose.visibility = View.INVISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "어드레스")
+                    Log.i("time", sec.toString())
+                    Log.i("test", MoveNet.getBiggestScore(0).toString())
                 }
-                if(sec == 7){
+                if (sec == 7) {
                     push?.start()
                     imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "푸시어웨이")
+                    Log.i("time", sec.toString())
+                    Log.i("test", MoveNet.getBiggestScore(0).toString())
                 }
-                if(sec == 14){
+                if (sec == 14) {
                     down?.start()
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "다운스윙")
+                    Log.i("time", sec.toString())
+                    Log.i("test", MoveNet.getBiggestScore(1).toString())
                 }
-                if(sec == 21){
+                if (sec == 21) {
                     back?.start()
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "백스윙")
+                    Log.i("time", sec.toString())
+                    Log.i("test", MoveNet.getBiggestScore(2).toString())
                 }
-                if(sec == 28){
+                if (sec == 28) {
                     forward?.start()
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "포워드스윙")
+                    Log.i("time", sec.toString())
+                    Log.i("test", MoveNet.getBiggestScore(3).toString())
                 }
-                if(sec == 35){
+                if (sec == 35) {
                     follow?.start()
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "팔로스루")
+                    Log.i("time", sec.toString())
+                    Log.i("test", MoveNet.getBiggestScore(4).toString())
+                }
+                if(sec==42){
+                    Log.i("time", sec.toString())
+                    Log.i("test", MoveNet.getBiggestScore(5).toString())
                 }
             }
+
         }
 
             if (isCameraPermissionGranted()) {
 
-                    if (cameraSource == null) {
-                        cameraSource =
-                            CameraSource(surfaceView, object : CameraSource.CameraSourceListener {
+                if (cameraSource == null) {
+                    cameraSource =
+                        CameraSource(surfaceView, object : CameraSource.CameraSourceListener {
 
-                                override fun onFPSListener(fps: Int) {
-                                    tvFPS.text = getString(R.string.tfe_pe_tv_fps, fps)
-                                }
-
-                                override fun onDetectedInfo(
-                                  personScore: Float?,
-                                  poseLabels: List<Pair<String, Float>>?
-
-                                ) {
-                                    tvScore.text =
-                                        getString(R.string.tfe_pe_tv_score, personScore ?: 0f)
-                                }
-
-                            }).apply {
-                                prepareCamera()
+                            override fun onFPSListener(fps: Int) {
+                                tvFPS.text = getString(R.string.tfe_pe_tv_fps, fps)
                             }
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            cameraSource?.initCamera()
+
+                            override fun onDetectedInfo(
+                                personScore: Float?,
+                                poseLabels: List<Pair<String, Float>>?
+
+                            ) {
+                                tvScore.text =
+                                    getString(R.string.tfe_pe_tv_score, personScore ?: 0f)
+//
+                            }
+
+                        }).apply {
+                            prepareCamera()
                         }
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        cameraSource?.initCamera()
                     }
+                }
                 createPoseEstimator()
             }
+
     }
 
 
