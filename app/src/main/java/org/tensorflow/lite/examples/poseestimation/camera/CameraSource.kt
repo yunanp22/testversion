@@ -68,7 +68,7 @@ class CameraSource(
     /** Frame count that have been processed so far in an one second interval to calculate FPS. */
     private var fpsTimer: Timer? = null
     private var frameProcessedInOneSecondInterval = 0
-    private var framesPerSecond = 0
+    var framesPerSecond = 0
 
     /** Detects, characterizes, and connects to a CameraDevice (used for all camera operations) */
     private val cameraManager: CameraManager by lazy {
@@ -259,43 +259,54 @@ class CameraSource(
         val persons = mutableListOf<Person>()
         val classificationResult: List<Pair<String, Float>>? = null
 
-        synchronized(lock) {
-            detector?.estimatePoses(bitmap, 1)?.let {
-                persons.addAll(it)
-            }
-        }
 //        synchronized(lock) {
-//            if(framesPerSecond==0){
-//                detector?.estimatePoses(bitmap, 1)?.let {
-//                    persons.addAll(it)
-//                }
-//            }
-//            if(framesPerSecond==7){
-//                detector?.estimatePoses(bitmap, 2)?.let {
-//                    persons.addAll(it)
-//                }
-//            }
-//            if(framesPerSecond==14){
-//                detector?.estimatePoses(bitmap, 3)?.let {
-//                    persons.addAll(it)
-//                }
-//            }
-//            if(framesPerSecond==21){
-//                detector?.estimatePoses(bitmap, 4)?.let {
-//                    persons.addAll(it)
-//                }
-//            }
-//            if(framesPerSecond==28){
-//                detector?.estimatePoses(bitmap, 5)?.let {
-//                    persons.addAll(it)
-//                }
-//            }
-//            if(framesPerSecond==35){
-//                detector?.estimatePoses(bitmap, 6)?.let {
-//                    persons.addAll(it)
-//                }
+//            detector?.estimatePoses(bitmap, 1)?.let {
+//                persons.addAll(it)
 //            }
 //        }
+        if(framesPerSecond < 7){
+            synchronized(lock) {
+                detector?.estimatePoses(bitmap, 1)?.let {
+                    persons.addAll(it)
+                }
+            }
+        }
+        if(framesPerSecond < 14){
+            synchronized(lock) {
+                detector?.estimatePoses(bitmap, 2)?.let {
+                    persons.addAll(it)
+                }
+            }
+        }
+        if(framesPerSecond < 21){
+            synchronized(lock) {
+                detector?.estimatePoses(bitmap, 3)?.let {
+                    persons.addAll(it)
+                }
+            }
+        }
+        if(framesPerSecond < 28){
+            synchronized(lock) {
+                detector?.estimatePoses(bitmap, 4)?.let {
+                    persons.addAll(it)
+                }
+            }
+        }
+        if(framesPerSecond < 35){
+            synchronized(lock) {
+                detector?.estimatePoses(bitmap, 5)?.let {
+                    persons.addAll(it)
+                }
+            }
+        }
+        if(framesPerSecond < 42){
+            synchronized(lock) {
+                detector?.estimatePoses(bitmap, 6)?.let {
+                    persons.addAll(it)
+                }
+            }
+        }
+
         frameProcessedInOneSecondInterval++
         if (frameProcessedInOneSecondInterval == 1) {
             // send fps to view

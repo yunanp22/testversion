@@ -31,6 +31,7 @@ import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import org.tensorflow.lite.examples.poseestimation.camera.CameraSource
 import java.util.*
 import kotlin.math.*
 
