@@ -35,6 +35,8 @@ import org.tensorflow.lite.examples.poseestimation.camera.CameraSource
 import java.util.*
 import kotlin.math.*
 
+private var biggestScore = DoubleArray(6)
+
 enum class ModelType {
     Lightning,
     Thunder
@@ -85,6 +87,10 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         // default to lightning.
         fun create(context: Context, device: Device): MoveNet =
             create(context, device, ModelType.Lightning)
+
+        fun getBiggestScore(poseNum: Int): Double{
+            return biggestScore[poseNum]
+        }
     }
 
     private var cropRegion: RectF? = null
@@ -220,22 +226,41 @@ override fun estimatePoses(bitmap: Bitmap, time: Int): List<Person> {
         val forwardswingScore = pose_forwardswing.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
         val followthroughScore = pose_followthrough.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
 
-        if(time<7)
+
+    if(time<7) {
+            if (biggestScore[0] < addressScore)
+                biggestScore[0] = addressScore
             return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
-        else if(time<14)
+        }
+        else if(time<14) {
+            if (biggestScore[1] < pushawayScore)
+                biggestScore[1] = pushawayScore
             return listOf(Person(keyPoints = keyPoints, score = pushawayScore.toFloat()))
-        else if(time<21)
+        }
+        else if(time<21) {
+            if (biggestScore[2] < downswingScore)
+                biggestScore[2] = downswingScore
             return listOf(Person(keyPoints = keyPoints, score = downswingScore.toFloat()))
-        else if(time<28)
-            return listOf(Person(keyPoints = keyPoints, score = backswingScore.toFloat()))
-        else if(time<35)
+        }
+        else if(time<28) {
+            if (biggestScore[3] < backswingScore)
+                biggestScore[3] = backswingScore
+                return listOf(Person(keyPoints = keyPoints, score = backswingScore.toFloat()))
+        }
+        else if(time<35) {
+            if (biggestScore[4] < forwardswingScore)
+                biggestScore[4] = forwardswingScore
             return listOf(Person(keyPoints = keyPoints, score = forwardswingScore.toFloat()))
+        }
         else if(time<42){
+            if (biggestScore[5] < followthroughScore)
+                biggestScore[5] = followthroughScore
             return listOf(Person(keyPoints = keyPoints, score = followthroughScore.toFloat()))
         }
         else{ //42 초 이후로는 카메라 종료되게 하면 좋을것 같아요
-            return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
+            return listOf(Person(keyPoints = keyPoints, score = 0.0f))
         }
+//    return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
     }
 
     fun getAngle(a1: PointF, a2: PointF, a3: PointF): Double {
