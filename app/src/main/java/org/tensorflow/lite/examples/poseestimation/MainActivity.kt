@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity() {
         forward = MediaPlayer.create(this, R.raw.forward)
         down = MediaPlayer.create(this, R.raw.down_swing)
 
-        imgPose.setImageResource(R.drawable.tfl2_logo)
+
 
 //        tvPoseName.setText(String.format(getString(R.string.tfe_pe_tv_poseName, poseArray[1])))
 
@@ -173,29 +173,57 @@ class MainActivity : AppCompatActivity() {
                 tvTime?.text = "시간: ${sec}"
                 if(sec == 0){
                     address?.start()
-                    imgPose.visibility = View.INVISIBLE
+                    imgPose.setImageResource(R.drawable.pose1)
+                    imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "어드레스")
+                }
+                if(sec == 2){
+                    imgPose.visibility = View.INVISIBLE
                 }
                 if(sec == 7){
                     push?.start()
+                    imgPose.setImageResource(R.drawable.pose2)
                     imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "푸시어웨이")
                 }
+                if(sec == 9){
+                    imgPose.visibility = View.INVISIBLE
+                }
                 if(sec == 14){
                     down?.start()
+                    imgPose.setImageResource(R.drawable.pose3)
+                    imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "다운스윙")
+                }
+                if(sec == 16){
+                    imgPose.visibility = View.INVISIBLE
                 }
                 if(sec == 21){
                     back?.start()
+                    imgPose.setImageResource(R.drawable.pose4)
+                    imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "백스윙")
+                }
+                if(sec == 23){
+                    imgPose.visibility = View.INVISIBLE
                 }
                 if(sec == 28){
                     forward?.start()
+                    imgPose.setImageResource(R.drawable.pose5)
+                    imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "포워드스윙")
+                }
+                if(sec == 30){
+                    imgPose.visibility = View.INVISIBLE
                 }
                 if(sec == 35){
                     follow?.start()
+                    imgPose.setImageResource(R.drawable.pose6)
+                    imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "팔로스루")
+                }
+                if(sec == 37){
+                    imgPose.visibility = View.INVISIBLE
                 }
             }
         }
