@@ -168,16 +168,6 @@ class MainActivity : AppCompatActivity() {
             }else if(fiveSec == 56 && sec<=42){
                 num1?.start()
             }
-//            val fiveSec = time%50
-//            if(fiveSec == 10 && sec<=30) {
-//                num4?.start()
-//            }else if(fiveSec == 20 && sec<=30){
-//                num3?.start()
-//            }else if(fiveSec == 30 && sec<=30){
-//                num2?.start()
-//            }else if(fiveSec == 40 && sec<=30){
-//                num1?.start()
-//            }
 
             runOnUiThread {
                 tvTime?.text = "시간: ${sec}"

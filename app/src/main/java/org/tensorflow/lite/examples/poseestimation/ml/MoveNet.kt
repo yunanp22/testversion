@@ -95,7 +95,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
 
 
 //    override fun estimatePoses(bitmap: Bitmap): List<Person> {
-override fun estimatePoses(bitmap: Bitmap, poseNum: Int): List<Person> {
+override fun estimatePoses(bitmap: Bitmap, time: Int): List<Person> {
         val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         if (cropRegion == null) {
             cropRegion = initRectF(bitmap.width, bitmap.height)
@@ -220,23 +220,23 @@ override fun estimatePoses(bitmap: Bitmap, poseNum: Int): List<Person> {
         val forwardswingScore = pose_forwardswing.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
         val followthroughScore = pose_followthrough.getScore(rightAlbowAngle, rightShoulderAngle, rightHipAngle, rightKneeAngle, leftKneeAngle)
 
-        if(poseNum==1)
+        if(time<7)
             return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
-        else if(poseNum==2)
+        else if(time<14)
             return listOf(Person(keyPoints = keyPoints, score = pushawayScore.toFloat()))
-        else if(poseNum==3)
+        else if(time<21)
             return listOf(Person(keyPoints = keyPoints, score = downswingScore.toFloat()))
-        else if(poseNum==4)
+        else if(time<28)
             return listOf(Person(keyPoints = keyPoints, score = backswingScore.toFloat()))
-        else if(poseNum==5)
+        else if(time<35)
             return listOf(Person(keyPoints = keyPoints, score = forwardswingScore.toFloat()))
-        else{
+        else if(time<42){
             return listOf(Person(keyPoints = keyPoints, score = followthroughScore.toFloat()))
         }
-//        return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
-//        return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
+        else{ //42 초 이후로는 카메라 종료되게 하면 좋을것 같아요
+            return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
+        }
     }
-
 
     fun getAngle(a1: PointF, a2: PointF, a3: PointF): Double {
         val p1: Double = hypot(((a1.x) - (a2.x)).toDouble(), ((a1.y) - (a2.y)).toDouble())

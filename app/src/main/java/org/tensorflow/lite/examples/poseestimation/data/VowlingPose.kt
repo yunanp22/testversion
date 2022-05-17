@@ -8,7 +8,6 @@ class VowlingPose {
     var correctRightHipAngle: Double = 0.0
     var correctRightKneeAngle: Double = 0.0
     var correctLeftKneeAngle: Double = 0.0
-    var scoreArray = DoubleArray(100)
 
     constructor(correctRightElbowAngle: Double, correctRightShoulderAngle: Double,
                 correctRightHipAngle: Double, correctRightKneeAngle: Double){
@@ -27,6 +26,7 @@ class VowlingPose {
         this.correctRightKneeAngle = correctRightKneeAngle
         this.correctLeftKneeAngle = correctLeftKneeAngle
     }
+
 
     fun getScore(a1: Double, a2: Double, a3: Double, a4: Double): Double {
         return 100 - ((correctRightElbowAngle - a1).absoluteValue + (correctRightShoulderAngle - a2).absoluteValue +

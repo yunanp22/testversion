@@ -21,7 +21,7 @@ import org.tensorflow.lite.examples.poseestimation.data.Person
 
 interface PoseDetector : AutoCloseable {
 
-    fun estimatePoses(bitmap: Bitmap, poseNum: Int): List<Person>
+    fun estimatePoses(bitmap: Bitmap, time: Int): List<Person>
 
     fun lastInferenceTimeNanos(): Long
 }
