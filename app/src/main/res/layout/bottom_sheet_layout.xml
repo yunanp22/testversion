@@ -36,7 +36,7 @@
         android:id="@+id/tvPoseName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/tfe_pe_tv_poseName"
+        android:text="@string/tv_poseName"
         android:textSize="30dp"/>
 
     <TextView

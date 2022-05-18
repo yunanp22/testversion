@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F3F3F3"
+    android:id="@+id/signup_layout">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:layout_marginTop="50dp">
+
+
+            <TextView
+                android:text="회원가입"
+                android:textColor="@color/black"
+                android:textSize="26dp"
+                android:textStyle="bold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textAlignment="center"
+                />
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="32dp"
+            android:background="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+            <LinearLayout
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                >
+                <TextView
+                    android:text="이메일"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:gravity="center"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:id="@+id/signup_email"
+                    android:hint="Email"
+                    android:ems="20"
+                    android:layout_marginLeft="20dp"
+                    android:inputType="textEmailAddress"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <LinearLayout
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:layout_marginTop="75dp">
+                <TextView
+                    android:text="닉네임"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:gravity="center"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:id="@+id/signup_nickname"
+                    android:hint="Nickname"
+                    android:layout_marginLeft="20dp"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view2"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="10dp"
+            android:background="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+            <LinearLayout
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="75dp">
+                <TextView
+                    android:text="비밀번호"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:gravity="center"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:id="@+id/signup_password"
+                    android:hint="Password"
+                    android:ems="8"
+                    android:layout_marginLeft="20dp"
+                    android:inputType="textPassword"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:layout_marginTop="75dp">
+                <TextView
+                    android:text="비밀번호확인"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:gravity="right"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:id="@+id/signup_password_check"
+                    android:hint="위와 동일하게 작성"
+                    android:ems="8"
+                    android:layout_marginLeft="20dp"
+                    android:inputType="textPassword"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view3"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="10dp"
+            android:background="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+            <LinearLayout
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="75dp">
+                <TextView
+                    android:text="나이"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:gravity="center"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:id="@+id/signup_age"
+                    android:hint="Age"
+                    android:inputType="number"
+                    android:layout_marginLeft="20dp"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:padding="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:layout_marginTop="75dp">
+                <TextView
+                    android:text="볼 사이즈"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:gravity="center"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:id="@+id/signup_size"
+                    android:hint="Ball size (lb)"
+                    android:inputType="number"
+                    android:layout_marginLeft="20dp"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="5"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/signUp_btn_cancel"
+
+            android:text="돌아가기"
+            android:textColor="#000000"
+            android:textSize="18sp"
+
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:textStyle="bold"
+            android:backgroundTint="#FFFFFF"
+
+            android:layout_marginLeft="30dp"
+
+            />
+
+        <Button
+            android:id="@+id/signUp_btn_submit"
+
+            android:text="가입하기"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+
+            android:layout_width="150dp"
+            android:layout_height="60dp"
+            android:textStyle="bold"
+            android:backgroundTint="#2E68FF"
+
+            android:layout_marginLeft="50dp"
+
+            />
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

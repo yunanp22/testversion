@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F3F3F3"
+    android:orientation="vertical"
+    android:id="@+id/login_layout">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/loginText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="70dp"
+            android:gravity="center"
+            android:text="로그인"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="26dp"
+            android:textAlignment="center">
+        </TextView>
+
+        <EditText
+            android:id="@+id/editID"
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+
+            android:drawableLeft="@drawable/drawable_left_image_id"
+            android:drawablePadding="5dp"
+            android:drawableTint="#979797"
+            android:ems="10"
+            android:hint="이메일"
+            android:inputType="textEmailAddress"
+            android:text="" >
+        </EditText>
+
+        <EditText
+            android:id="@+id/editPassword"
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="10dp"
+            android:drawableLeft="@drawable/drawable_left_image_passwd"
+            android:drawablePadding="5dp"
+            android:drawableTint="#979797"
+            android:ems="10"
+            android:hint="패스워드"
+            android:inputType="textPassword">
+        </EditText>
+
+        <Button
+            android:id="@+id/login_btn"
+
+            android:text="로그인"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:textStyle="bold"
+            android:backgroundTint="#2E68FF"
+
+            />
+        <Button
+            android:id="@+id/signUp_btn"
+
+            android:text="회원가입"
+            android:textColor="#000000"
+            android:textSize="18sp"
+
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:textStyle="bold"
+            android:backgroundTint="#FFFFFF"
+            />
+        <Button
+            android:id="@+id/find_btn"
+
+            android:text="계정/비밀번호 찾기"
+            android:textColor="#DBDBDB"
+            android:textSize="10sp"
+            android:textStyle="bold"
+
+            android:padding="0dp"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:background="#00ff0000"
+
+            android:layout_gravity="right"
+            android:layout_marginRight="56dp"
+            />
+
+        <TextView
+            android:id="@+id/loginAnother"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="다른 서비스 계정으로 로그인"
+            android:textColor="#DBDBDB"
+            android:textStyle="bold"
+            android:textSize="13dp"
+            android:textAlignment="center"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="40dp">
+        </TextView>
+
+        <Button
+            android:text="구글 로그인"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:backgroundTint="@color/white">
+        </Button>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:orientation="vertical"
+    android:clickable="true">
+
+        <LinearLayout
+            android:layout_width="280dp"
+            android:layout_height="240dp"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="280dp"
+                    android:layout_height="180dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp">
+
+                        <ImageView
+                            android:id="@+id/item_imageview"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:scaleType="centerCrop"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/duration_capsule"
+                            android:layout_gravity="bottom|right"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="4dp">
+
+                                <TextView
+                                    android:id="@+id/duration"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="12:34"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp"
+                                    android:layout_gravity="center"/>
+
+                        </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/item_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="볼링 기본기 초급1"
+                    android:layout_marginTop="8dp"/>
+
+                <TextView
+                    android:id="@+id/item_subtext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="입문"
+                    android:layout_marginTop="8dp"/>
+
+        </LinearLayout>
+
+</LinearLayout>
