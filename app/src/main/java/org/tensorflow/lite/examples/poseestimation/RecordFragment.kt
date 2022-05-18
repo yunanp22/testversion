@@ -107,6 +107,8 @@ class RecordFragment : Fragment() {
         return view
     }
 
+//    private lateinit var relativeOrientation: OrientationLiveData
+
 
 
     /** A [SurfaceView] for camera preview.   */
