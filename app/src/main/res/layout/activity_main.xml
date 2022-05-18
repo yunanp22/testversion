@@ -14,13 +14,13 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar3"
         android:layout_width="match_parent"
-        android:layout_height="693dp"
+        android:layout_height="match_parent"
         android:background="#00000000">
 
         <ImageView
             android:id="@+id/imgPose"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:contentDescription="@null" />
     </androidx.appcompat.widget.Toolbar>
 
