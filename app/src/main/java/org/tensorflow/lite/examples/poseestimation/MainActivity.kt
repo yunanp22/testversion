@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     private var back : MediaPlayer? = null
     private var forward : MediaPlayer? = null
     private var follow : MediaPlayer? = null
+    private var end : MediaPlayer? = null
 
     /** Default device is CPU */
     private var device = Device.CPU
@@ -75,6 +76,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvFPS: TextView
     private lateinit var tvPoseName: TextView
     private var cameraSource: CameraSource? = null
+
     private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -150,9 +152,7 @@ class MainActivity : AppCompatActivity() {
         follow = MediaPlayer.create(this, R.raw.follow_throw)
         forward = MediaPlayer.create(this, R.raw.forward)
         down = MediaPlayer.create(this, R.raw.down_swing)
-
-
-
+        end = MediaPlayer.create(this,R.raw.end)
 //        tvPoseName.setText(String.format(getString(R.string.tfe_pe_tv_poseName, poseArray[1])))
 
         timerTask = kotlin.concurrent.timer(period = 100) {
@@ -174,10 +174,11 @@ class MainActivity : AppCompatActivity() {
                 if(sec == 0){
                     address?.start()
                     imgPose.setImageResource(R.drawable.pose1)
+
                     imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "어드레스")
                 }
-                if(sec == 2){
+                if(sec == 2 || sec == 9 || sec == 16 || sec == 23 || sec == 30 || sec == 37){
                     imgPose.visibility = View.INVISIBLE
                 }
                 if(sec == 7){
@@ -186,35 +187,25 @@ class MainActivity : AppCompatActivity() {
                     imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "푸시어웨이")
                 }
-                if(sec == 9){
-                    imgPose.visibility = View.INVISIBLE
-                }
                 if(sec == 14){
                     down?.start()
                     imgPose.setImageResource(R.drawable.pose3)
                     imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "다운스윙")
                 }
-                if(sec == 16){
-                    imgPose.visibility = View.INVISIBLE
-                }
+
                 if(sec == 21){
                     back?.start()
                     imgPose.setImageResource(R.drawable.pose4)
                     imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "백스윙")
                 }
-                if(sec == 23){
-                    imgPose.visibility = View.INVISIBLE
-                }
+
                 if(sec == 28){
                     forward?.start()
                     imgPose.setImageResource(R.drawable.pose5)
                     imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "포워드스윙")
-                }
-                if(sec == 30){
-                    imgPose.visibility = View.INVISIBLE
                 }
                 if(sec == 35){
                     follow?.start()
@@ -222,8 +213,9 @@ class MainActivity : AppCompatActivity() {
                     imgPose.visibility = View.VISIBLE
                     tvPoseName.text = getString(R.string.tfe_pe_tv_poseName, "팔로스루")
                 }
-                if(sec == 37){
-                    imgPose.visibility = View.INVISIBLE
+
+                if(sec == 43){
+                    end?.start()
                 }
             }
         }
