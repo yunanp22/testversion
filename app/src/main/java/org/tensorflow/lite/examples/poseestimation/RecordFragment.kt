@@ -20,14 +20,17 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +42,17 @@ import java.util.*
 
 class RecordFragment : Fragment() {
     companion object {
-        private const val FRAGMENT_DIALOG = "dialog"
+        private const val REQUEST_CODE_PERMISSIONS = 10
+        private const val TAG = "Main"
+        private val REQUIRED_PERMISSIONS =
+            mutableListOf (
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO
+            ).apply {
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }
+            }.toTypedArray()
 
         fun newInstance() : RecordFragment {
             return RecordFragment()
@@ -54,6 +67,8 @@ class RecordFragment : Fragment() {
     private lateinit var safeContext: Context
     private lateinit var recordButton: ImageView
     private lateinit var closeButton: ImageView
+
+    var isRecording = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,14 +87,25 @@ class RecordFragment : Fragment() {
         surfaceView =  view.rootView.findViewById(R.id.surfaceView)
         imgPose =  view.rootView.findViewById(R.id.imgPose)
 
-        if (!isCameraPermissionGranted()) {
-            requestPermission()
+        if (allPermissionsGranted()) {
+            openCamera()
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
 
         recordButton = view.findViewById(R.id.record_button)
         closeButton = view.findViewById(R.id.close_button)
 
+
+        recordButton.setOnClickListener {
+            if(isRecording) {
+                recordButton.setImageResource(R.drawable.ic_record_btn)
+            } else {
+                recordButton.setImageResource(R.drawable.ic_record_btn_red)
+            }
+        }
         //닫기 버튼 클릭 리스너 설정
         closeButton.setOnClickListener {
             //홈 프레그먼트로 이동
@@ -107,7 +133,7 @@ class RecordFragment : Fragment() {
         return view
     }
 
-//    private lateinit var relativeOrientation: OrientationLiveData
+    private lateinit var relativeOrientation: OrientationLiveData
 
 
 
@@ -314,8 +340,17 @@ class RecordFragment : Fragment() {
                             }
 
                         }).apply {
-                            prepareCamera()
+                            // Used to rotate the output media to match device orientation
+                            relativeOrientation = OrientationLiveData(requireContext(), prepareCamera()).apply {
+                                observe(viewLifecycleOwner, Observer {
+                                        orientation -> Log.d(TAG, "Orientation changed: $orientation")
+                                })
+                            }
+
+                            setOrientation(relativeOrientation)
+
                         }
+
                     lifecycleScope.launch(Dispatchers.Main) {
                         cameraSource?.initCamera()
                     }
@@ -352,6 +387,28 @@ class RecordFragment : Fragment() {
 
     private fun showToast(message: String) {
         Toast.makeText(this.safeContext, message, Toast.LENGTH_LONG).show()
+    }
+
+    //요구한 모든 권한을 획득 했는지 확인
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(
+            safeContext, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    //카메라 및 저장 권한 획득 여부에 따른 결과 처리 함수
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults:
+        IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (allPermissionsGranted()) {
+                openCamera()
+            } else {
+                Toast.makeText(safeContext,
+                    "Permissions not granted by the user.",
+                    Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
 //    /**

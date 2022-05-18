@@ -17,30 +17,44 @@ limitations under the License.
 package org.tensorflow.lite.examples.poseestimation.camera
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.Rect
-import android.hardware.camera2.CameraCaptureSession
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraDevice
-import android.hardware.camera2.CameraManager
+import android.hardware.camera2.*
 import android.media.ImageReader
+import android.media.MediaCodec
+import android.media.MediaRecorder
+import android.media.MediaScannerConnection
+import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
+import android.provider.MediaStore
 import android.util.Log
+import android.util.Range
 import android.view.Surface
 import android.view.SurfaceView
-import android.view.View
+import android.webkit.MimeTypeMap
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.tensorflow.lite.examples.poseestimation.R
-import org.tensorflow.lite.examples.poseestimation.VisualizationUtils
-import org.tensorflow.lite.examples.poseestimation.YuvToRgbConverter
+import org.tensorflow.lite.examples.poseestimation.*
 import org.tensorflow.lite.examples.poseestimation.data.Person
+//import org.tensorflow.lite.examples.poseestimation.ml.MoveNetMultiPose
+//import org.tensorflow.lite.examples.poseestimation.ml.PoseClassifier
 import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
+//import org.tensorflow.lite.examples.poseestimation.ml.TrackerType
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -56,6 +70,19 @@ class CameraSource(
         /** Threshold for confidence score. */
         private const val MIN_CONFIDENCE = .2f
         private const val TAG = "Camera Source"
+
+        private const val RECORDER_VIDEO_BITRATE: Int = 10_000_000
+        private const val MIN_REQUIRED_RECORDING_TIME_MILLIS: Long = 1000L
+
+        /** Creates a [File] named with the current date and time */
+        private fun createFile(context: Context, extension: String): File {
+
+            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
+            return File(
+                Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOWNLOADS), "VID_${sdf.format(Date())}.$extension")
+//            return  File(context.getExternalFilesDir(null), "VID_${sdf.format(Date())}.$extension")
+        }
     }
 
     private val lock = Any()
@@ -64,6 +91,56 @@ class CameraSource(
     private var isTrackerEnabled = false
     private var yuvConverter: YuvToRgbConverter = YuvToRgbConverter(surfaceView.context)
     private lateinit var imageBitmap: Bitmap
+
+    /*
+비디오 녹화 코드
+ */
+    /** File where the recording will be saved */
+    private var outputFile: File = createFile(surfaceView.rootView.context, "mp4")
+    /**
+     * Setup a persistent [Surface] for the recorder so we can use it as an output target for the
+     * camera session without preparing the recorder
+     */
+    private val recorderSurface: Surface by lazy {
+
+        // Get a persistent Surface from MediaCodec, don't forget to release when done
+        val surface = MediaCodec.createPersistentInputSurface()
+
+        // Prepare and release a dummy MediaRecorder with our new surface
+        // Required to allocate an appropriately sized buffer before passing the Surface as the
+        //  output target to the capture session
+        createRecorder(surface).apply {
+            prepare()
+            release()
+        }
+
+        surface
+    }
+
+    /** Saves the video recording */
+    private val recorder: MediaRecorder by lazy { createRecorder(recorderSurface) }
+
+    private var recordingStartMillis: Long = 0L
+
+    /** Creates a [MediaRecorder] instance using the provided [Surface] as input */
+    private fun createRecorder(surface: Surface) = MediaRecorder().apply {
+        setAudioSource(MediaRecorder.AudioSource.MIC)
+        setVideoSource(MediaRecorder.VideoSource.SURFACE)
+        setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+        setVideoEncoder(MediaRecorder.VideoEncoder.H264)
+        setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+        setVideoSize(PREVIEW_WIDTH, PREVIEW_HEIGHT)
+        if(framesPerSecond > 0) setVideoFrameRate(framesPerSecond)
+        setOutputFile(outputFile.absolutePath)
+        setVideoEncodingBitRate(RECORDER_VIDEO_BITRATE)
+        setInputSurface(surface)
+    }
+
+    private var isRecording = false
+
+    private lateinit var characteristics: CameraCharacteristics
+    private lateinit var relativeOrientation: OrientationLiveData
+
 
     /** Frame count that have been processed so far in an one second interval to calculate FPS. */
     private var fpsTimer: Timer? = null
@@ -123,7 +200,7 @@ class CameraSource(
         }, imageReaderHandler)
 
         imageReader?.surface?.let { surface ->
-            session = createSession(listOf(surface))
+            session = createSession(listOf(surface, recorderSurface))
             val cameraRequest = camera?.createCaptureRequest(
                 CameraDevice.TEMPLATE_PREVIEW
             )?.apply {
@@ -131,6 +208,56 @@ class CameraSource(
             }
             cameraRequest?.build()?.let {
                 session?.setRepeatingRequest(it, null, null)
+            }
+
+            val recordRequest = camera?.createCaptureRequest(
+                CameraDevice.TEMPLATE_RECORD
+            )?.apply {
+                addTarget(surface)
+                addTarget(recorderSurface)
+//                set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, Range(framesPerSecond, framesPerSecond))
+            }
+            recordRequest?.build()?.let {
+                session?.setRepeatingRequest(it, null, null)
+            }
+
+            val recordButton = surfaceView.rootView.findViewById<ImageView>(R.id.record_button)
+            recordButton.setOnClickListener {
+                if (isRecording) {
+                    recorder.stop()
+                    // Broadcasts the media file to the rest of the system
+                    MediaScannerConnection.scanFile(
+                        surfaceView.context, arrayOf(outputFile.absolutePath), null, null
+                    )
+
+//                    // Launch external activity via intent to play video recorded using our provider
+//                    surfaceView.context.startActivity(Intent().apply {
+//                        action = Intent.ACTION_VIEW
+//                        type = MimeTypeMap.getSingleton()
+//                            .getMimeTypeFromExtension(outputFile.extension)
+//                        val authority = "${BuildConfig.APPLICATION_ID}.provider"
+//                        data = FileProvider.getUriForFile(surfaceView.context, authority, outputFile)
+//                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+//                                Intent.FLAG_ACTIVITY_CLEAR_TOP
+//                    })
+
+                    recordButton.setImageResource(R.drawable.ic_record_btn)
+                } else {
+//                    requestedOrientation =
+//                        ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                    relativeOrientation.value?.let { recorder.setOrientationHint(it) }
+                    recorder.prepare()
+                    recorder.start()
+
+                    recordingStartMillis = System.currentTimeMillis()
+                    Log.d(TAG, "Recording started")
+
+                    recordButton.setImageResource(R.drawable.ic_record_btn_red)
+                }
+                isRecording = !isRecording
+
+//                showToast("$isRecording")
+
             }
         }
     }
@@ -165,7 +292,7 @@ class CameraSource(
             }, imageReaderHandler)
         }
 
-    fun prepareCamera() {
+    fun prepareCamera(): CameraCharacteristics {
         for (cameraId in cameraManager.cameraIdList) {
             val characteristics = cameraManager.getCameraCharacteristics(cameraId)
 
@@ -178,6 +305,15 @@ class CameraSource(
             }
             this.cameraId = cameraId
         }
+
+        characteristics = cameraManager.getCameraCharacteristics(cameraId)
+
+        return characteristics
+
+    }
+
+    fun setOrientation(orientation: OrientationLiveData) {
+        this.relativeOrientation = orientation
     }
 
     fun setDetector(detector: PoseDetector) {
