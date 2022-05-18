@@ -214,7 +214,7 @@ override fun estimatePoses(bitmap: Bitmap, time: Int): List<Person> {
         val pose_address = VowlingPose(90.0, 0.0, 160.0, 160.0)
         val pose_pushaway = VowlingPose(105.0, 15.0, 150.0, 150.0, 150.0)
         val pose_downswing = VowlingPose(180.0, 10.0, 170.0, 150.0, 150.0)
-        val pose_backswing = VowlingPose(180.0, 90.0, 110.0, 130.0, 130.0)
+        val pose_backswing = VowlingPose(180.0, 60.0, 110.0, 130.0, 130.0)
         val pose_forwardswing = VowlingPose(180.0, 30.0, 175.0, 170.0, 80.0)
         val pose_followthrough = VowlingPose(160.0, 160.0, 175.0, 180.0, 100.0)
 
