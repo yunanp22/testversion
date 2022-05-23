@@ -6,4 +6,14 @@
     <!--    <string name="tfe_pe_tv_model">Model: Movenet Lightning </string>-->
     <string name="tv_fps">Fps : %d</string>
     <string name="tv_poseName">자세: %s</string>
+
+    <string-array name="pose_list">
+        <item>어드레스</item>
+        <item>푸시어웨이</item>
+        <item>다운스윙</item>
+        <item>백스윙</item>
+        <item>포워드스윙</item>
+        <item>팔로우스루</item>
+
+    </string-array>
 </resources>

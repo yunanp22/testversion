@@ -16,10 +16,7 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.poseestimation
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import org.tensorflow.lite.examples.poseestimation.data.BodyPart
 import org.tensorflow.lite.examples.poseestimation.data.Person
 import kotlin.math.max
@@ -67,12 +64,12 @@ object VisualizationUtils {
     ): Bitmap {
         val paintCircle = Paint().apply {
             strokeWidth = CIRCLE_RADIUS
-            color = Color.RED
+            color = Color.WHITE
             style = Paint.Style.FILL
         }
         val paintLine = Paint().apply {
             strokeWidth = LINE_WIDTH
-            color = Color.RED
+            color = Color.argb(100,255,255,255)
             style = Paint.Style.STROKE
         }
 
@@ -81,6 +78,9 @@ object VisualizationUtils {
             color = Color.BLUE
             textAlign = Paint.Align.LEFT
         }
+
+
+
 
         val output = input.copy(Bitmap.Config.ARGB_8888, true)
         val originalSizeCanvas = Canvas(output)

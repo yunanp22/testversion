@@ -80,7 +80,7 @@ class CameraSource(
             val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
             return File(
                 Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS), "VID_${sdf.format(Date())}.$extension")
+                Environment.DIRECTORY_DCIM), "VID_${sdf.format(Date())}.$extension")
 //            return  File(context.getExternalFilesDir(null), "VID_${sdf.format(Date())}.$extension")
         }
     }
@@ -91,6 +91,10 @@ class CameraSource(
     private var isTrackerEnabled = false
     private var yuvConverter: YuvToRgbConverter = YuvToRgbConverter(surfaceView.context)
     private lateinit var imageBitmap: Bitmap
+
+
+
+
 
     /*
 비디오 녹화 코드
@@ -141,7 +145,6 @@ class CameraSource(
     private lateinit var characteristics: CameraCharacteristics
     private lateinit var relativeOrientation: OrientationLiveData
 
-
     /** Frame count that have been processed so far in an one second interval to calculate FPS. */
     private var fpsTimer: Timer? = null
     private var frameProcessedInOneSecondInterval = 0
@@ -174,6 +177,7 @@ class CameraSource(
         camera = openCamera(cameraManager, cameraId)
         imageReader =
             ImageReader.newInstance(PREVIEW_WIDTH, PREVIEW_HEIGHT, ImageFormat.YUV_420_888, 3)
+
         imageReader?.setOnImageAvailableListener({ reader ->
             val image = reader.acquireLatestImage()
             if (image != null) {
@@ -195,6 +199,7 @@ class CameraSource(
                     rotateMatrix, false
                 )
                 processImage(rotatedBitmap)
+
                 image.close()
             }
         }, imageReaderHandler)
@@ -221,44 +226,39 @@ class CameraSource(
                 session?.setRepeatingRequest(it, null, null)
             }
 
-            val recordButton = surfaceView.rootView.findViewById<ImageView>(R.id.record_button)
-            recordButton.setOnClickListener {
-                if (isRecording) {
-                    recorder.stop()
-                    // Broadcasts the media file to the rest of the system
-                    MediaScannerConnection.scanFile(
-                        surfaceView.context, arrayOf(outputFile.absolutePath), null, null
-                    )
+//            val recordButton = surfaceView.rootView.findViewById<ImageView>(R.id.record_button)
+//            recordButton.setOnClickListener {
+//                if (isRecording) {
+//                    recorder.stop()
+//
+////                    val elapsedTimeMillis = System.currentTimeMillis() - recordingStartMillis
+//
+//
+//                    // Broadcasts the media file to the rest of the system
+//                    MediaScannerConnection.scanFile(
+//                        surfaceView.context, arrayOf(outputFile.absolutePath), null, null
+//                    )
+//
 
-//                    // Launch external activity via intent to play video recorded using our provider
-//                    surfaceView.context.startActivity(Intent().apply {
-//                        action = Intent.ACTION_VIEW
-//                        type = MimeTypeMap.getSingleton()
-//                            .getMimeTypeFromExtension(outputFile.extension)
-//                        val authority = "${BuildConfig.APPLICATION_ID}.provider"
-//                        data = FileProvider.getUriForFile(surfaceView.context, authority, outputFile)
-//                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-//                                Intent.FLAG_ACTIVITY_CLEAR_TOP
-//                    })
-
-                    recordButton.setImageResource(R.drawable.ic_record_btn)
-                } else {
-//                    requestedOrientation =
-//                        ActivityInfo.SCREEN_ORIENTATION_LOCKED
-                    relativeOrientation.value?.let { recorder.setOrientationHint(it) }
-                    recorder.prepare()
-                    recorder.start()
-
-                    recordingStartMillis = System.currentTimeMillis()
-                    Log.d(TAG, "Recording started")
-
-                    recordButton.setImageResource(R.drawable.ic_record_btn_red)
-                }
-                isRecording = !isRecording
-
-//                showToast("$isRecording")
-
-            }
+//
+//                    recordButton.setImageResource(R.drawable.ic_record_btn)
+//                } else {
+////                    requestedOrientation =
+////                        ActivityInfo.SCREEN_ORIENTATION_LOCKED
+//                    relativeOrientation.value?.let { recorder.setOrientationHint(it) }
+//                    recorder.prepare()
+//                    recorder.start()
+//
+////                    recordingStartMillis = System.currentTimeMillis()
+//                    Log.d(TAG, "Recording started")
+//
+//                    recordButton.setImageResource(R.drawable.ic_record_btn_red)
+//                }
+//                isRecording = !isRecording
+//
+////                showToast("$isRecording")
+//
+//            }
         }
     }
 
@@ -312,6 +312,11 @@ class CameraSource(
 
     }
 
+    fun getRecordingSurface(): Surface {
+        return recorderSurface
+    }
+
+
     fun setOrientation(orientation: OrientationLiveData) {
         this.relativeOrientation = orientation
     }
@@ -336,7 +341,6 @@ class CameraSource(
                     framesPerSecond = frameProcessedInOneSecondInterval
                     frameProcessedInOneSecondInterval = 0
                     time++
-
                 }
             },
             0,
@@ -366,7 +370,7 @@ class CameraSource(
         val classificationResult: List<Pair<String, Float>>? = null
 
         synchronized(lock) {
-            detector?.estimatePoses(bitmap, time)?.let {
+            detector?.estimatePoses(bitmap)?.let {
                 persons.addAll(it)
             }
         }
@@ -374,7 +378,8 @@ class CameraSource(
         frameProcessedInOneSecondInterval++
         if (frameProcessedInOneSecondInterval == 1) {
             // send fps to view
-            listener?.onFPSListener(framesPerSecond)
+            listener?.onTimeListener(time)
+
         }
 
         // if the model returns only one item, show that item's score.
@@ -382,6 +387,7 @@ class CameraSource(
             listener?.onDetectedInfo(persons[0].score, classificationResult)
         }
         visualize(persons, bitmap)
+
     }
 
     private fun visualize(persons: List<Person>, bitmap: Bitmap) {
@@ -435,7 +441,9 @@ class CameraSource(
     }
 
     interface CameraSourceListener {
-        fun onFPSListener(fps: Int)
+//        fun onFPSListener(fps: Int)
+
+        fun onTimeListener(time: Int)
 
         fun onDetectedInfo(personScore: Float?, poseLabels: List<Pair<String, Float>>?)
     }

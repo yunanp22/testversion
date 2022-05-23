@@ -13,9 +13,9 @@
     android:paddingEnd="8dp"
     android:paddingBottom="16dp"
     app:behavior_hideable="false"
-    app:behavior_peekHeight="36dp"
+    app:behavior_peekHeight="32dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/fragment_record">
 
     <ImageView
         android:id="@+id/bottom_sheet_arrow"
