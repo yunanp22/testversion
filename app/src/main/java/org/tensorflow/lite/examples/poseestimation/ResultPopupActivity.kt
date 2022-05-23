@@ -42,6 +42,28 @@ class ResultPopupActivity: AppCompatActivity() {
                 "포워드 점수: $score5\n" +
                 "팔로우스루 점수: $score6\n"
 
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (getSelectedSpinnerItem() == 0) {
+                    comment.text = "어드레스 점수: $score1"
+                } else if (getSelectedSpinnerItem() == 1) {
+                    comment.text = "푸쉬어웨이 점수: $score2"
+                } else if (getSelectedSpinnerItem() == 2) {
+                    comment.text = "다운스윙 점수: $score3"
+                } else if (getSelectedSpinnerItem() == 3) {
+                    comment.text = "백스윙 점수: $score4"
+                } else if (getSelectedSpinnerItem() == 4) {
+                    comment.text = "포워드 점수: $score5"
+                } else {
+                    comment.text = "팔로우스루 점수: $score6"
+                }
+            }
+
+        }
 
 
         okButton.setOnClickListener {
@@ -51,8 +73,8 @@ class ResultPopupActivity: AppCompatActivity() {
 
     }
 
-    fun getValues(view: View) {
-        Toast.makeText(this, "Pose: " + spinner.selectedItem.toString(), Toast.LENGTH_LONG).show()
+    fun getSelectedSpinnerItem(): Int {
+        return spinner.selectedItemPosition
     }
 }
 

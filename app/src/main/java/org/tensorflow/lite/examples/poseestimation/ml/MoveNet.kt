@@ -37,42 +37,44 @@ import java.util.*
 import kotlin.math.*
 
 
-private var rightAlbowAngle1 = FloatArray(100)
-private var rightAlbowAngle2 = FloatArray(100)
-private var rightAlbowAngle3 = FloatArray(100)
-private var rightAlbowAngle4 = FloatArray(100)
-private var rightAlbowAngle5 = FloatArray(100)
-private var rightAlbowAngle6 = FloatArray(100)
+private var rightAlbowAngle1 = ArrayList<Float>()
+private var rightAlbowAngle2 = ArrayList<Float>()
+private var rightAlbowAngle3 = ArrayList<Float>()
+private var rightAlbowAngle4 = ArrayList<Float>()
+private var rightAlbowAngle5 = ArrayList<Float>()
+private var rightAlbowAngle6 = ArrayList<Float>()
 
-private var rightShoulderAngle1 = FloatArray(100)
-private var rightShoulderAngle2 = FloatArray(100)
-private var rightShoulderAngle3 = FloatArray(100)
-private var rightShoulderAngle4 = FloatArray(100)
-private var rightShoulderAngle5 = FloatArray(100)
-private var rightShoulderAngle6 = FloatArray(100)
+private var rightShoulderAngle1 = ArrayList<Float>()
+private var rightShoulderAngle2 = ArrayList<Float>()
+private var rightShoulderAngle3 = ArrayList<Float>()
+private var rightShoulderAngle4 = ArrayList<Float>()
+private var rightShoulderAngle5 = ArrayList<Float>()
+private var rightShoulderAngle6 = ArrayList<Float>()
 
-private var rightHipAngle1 = FloatArray(100)
-private var rightHipAngle2 = FloatArray(100)
-private var rightHipAngle3 = FloatArray(100)
-private var rightHipAngle4 = FloatArray(100)
-private var rightHipAngle5 = FloatArray(100)
-private var rightHipAngle6 = FloatArray(100)
+private var rightHipAngle1 = ArrayList<Float>()
+private var rightHipAngle2 = ArrayList<Float>()
+private var rightHipAngle3 = ArrayList<Float>()
+private var rightHipAngle4 = ArrayList<Float>()
+private var rightHipAngle5 = ArrayList<Float>()
+private var rightHipAngle6 = ArrayList<Float>()
 
-private var rightKneeAngle1 = FloatArray(100)
-private var rightKneeAngle2 = FloatArray(100)
-private var rightKneeAngle3 = FloatArray(100)
-private var rightKneeAngle4 = FloatArray(100)
-private var rightKneeAngle5 = FloatArray(100)
-private var rightKneeAngle6 = FloatArray(100)
+private var rightKneeAngle1 = ArrayList<Float>()
+private var rightKneeAngle2 = ArrayList<Float>()
+private var rightKneeAngle3 = ArrayList<Float>()
+private var rightKneeAngle4 = ArrayList<Float>()
+private var rightKneeAngle5 = ArrayList<Float>()
+private var rightKneeAngle6 = ArrayList<Float>()
 
-private var leftKneeAngle1 = FloatArray(100)
-private var leftKneeAngle2 = FloatArray(100)
-private var leftKneeAngle3 = FloatArray(100)
-private var leftKneeAngle4 = FloatArray(100)
-private var leftKneeAngle5 = FloatArray(100)
+private var leftKneeAngle1 = ArrayList<Float>()
+private var leftKneeAngle2 = ArrayList<Float>()
+private var leftKneeAngle3 = ArrayList<Float>()
+private var leftKneeAngle4 = ArrayList<Float>()
+private var leftKneeAngle5 = ArrayList<Float>()
 
 private var rightAlbowAngles = arrayOf(rightAlbowAngle1, rightAlbowAngle2, rightAlbowAngle3, rightAlbowAngle4,
     rightAlbowAngle5, rightAlbowAngle6)
+//private var rightAlbowAngles = arrayOf(rightAlbowAngle1.toFloatArray(), rightAlbowAngle2.toFloatArray(), rightAlbowAngle3.toFloatArray(), rightAlbowAngle4.toFloatArray(),
+//    rightAlbowAngle5.toFloatArray(), rightAlbowAngle6.toFloatArray())
 private var rightShoulderAngles = arrayOf(rightShoulderAngle1, rightShoulderAngle2, rightShoulderAngle3,
     rightShoulderAngle4, rightShoulderAngle5, rightShoulderAngle6)
 private var rightHipAngles = arrayOf(rightHipAngle1, rightHipAngle2, rightHipAngle3, rightHipAngle4,
@@ -155,21 +157,25 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             return biggestScore[poseNum]
         }
 
-        // rightAlbowAngles, rightShoulderAngles, rightHipAngles, rightKneeAngles, reftKneeAngles
-        fun getRightAlbowAngles(index: Int): FloatArray{
-            return rightAlbowAngles[index]
+        // rightAlbowAngles, rightShoulderAngles, rightHipAngles, rightKneeAngles, leftKneeAngles
+        fun getRightAlbowAngles(): Array<ArrayList<Float>>{
+            return rightAlbowAngles
         }
-        fun getRightShoulderAngles(index: Int): FloatArray{
-            return rightShoulderAngles[index]
+
+        fun getRightShoulderAngles(): Array<ArrayList<Float>>{
+            return rightShoulderAngles
         }
-        fun getRightHipAngles(index: Int): FloatArray{
-            return rightHipAngles[index]
+
+        fun getRightHipAngles(): Array<ArrayList<Float>>{
+            return rightHipAngles
         }
-        fun getRightKneeAngles(index: Int): FloatArray{
-            return rightKneeAngles[index]
+
+        fun getRightKneeAngles(): Array<ArrayList<Float>>{
+            return rightKneeAngles
         }
-        fun getLeftKneeAngles(index: Int): FloatArray{
-            return leftKneeAngles[index]
+
+        fun getLeftKneeAngles(): Array<ArrayList<Float>>{
+            return leftKneeAngles
         }
     }
 
@@ -408,12 +414,14 @@ override fun estimatePoses(bitmap: Bitmap): List<Person> {
     // rightAlbowAngles, rightShoulderAngles, rightHipAngles, rightKneeAngles, leftKneeAngles
     if(time < 7) {
 
-        rightAlbowAngles[0].plus(rightAlbowAngle)
-        rightShoulderAngles[0].plus(rightShoulderAngle)
-        rightHipAngles[0].plus(rightHipAngle)
-        rightKneeAngles[0].plus(rightKneeAngle)
+        Log.d("TAG", "estimatePoses: ${rightAlbowAngle}")
+        rightAlbowAngles[0].add(rightAlbowAngle)
+        rightShoulderAngles[0].add(rightShoulderAngle)
+        rightHipAngles[0].add(rightHipAngle)
+        rightKneeAngles[0].add(rightKneeAngle)
 //             return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
 //                 return listOf(Person(keyPoints = keyPoints, score = 100.0f))
+        Log.d("TAG", "estimatePoses: ${rightAlbowAngles[0][0]}")
     }
 
     else if(time < 14) {

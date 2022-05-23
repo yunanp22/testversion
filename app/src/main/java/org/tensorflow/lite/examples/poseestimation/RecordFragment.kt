@@ -347,12 +347,29 @@ class RecordFragment : Fragment() {
                         if (sec == 7) {
                             /** 정확도가 가장 높았던 각도*/
                             val pose_address = VowlingPose(90.0f, 0.0f, 160.0f, 160.0f)
-                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(0), 90.0f)
-                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(0), 0.0f)
-                            var a3 = getNearValue(MoveNet.getRightHipAngles(0), 160.0f)
-                            var a4 = getNearValue(MoveNet.getRightKneeAngles(0), 160.0f)
-                            addressScore = pose_address.getScore(a1, a2, a3, a4)
+//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(), 90.0f, 0)
+//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 0.0f, 0)
+//                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 160.0f, 0)
+//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 160.0f, 0)
+                            val listSize = MoveNet.getRightAlbowAngles().size
+                            var bigNum = pose_address.getScore(MoveNet.getRightAlbowAngles()[0][0], MoveNet.getRightShoulderAngles()[0][0], MoveNet.getRightHipAngles()[0][0], MoveNet.getRightKneeAngles()[0][0])
+                            for(i in 1 .. listSize) {
+
+                                if(bigNum < pose_address.getScore(MoveNet.getRightAlbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])) {
+                                    bigNum = pose_address.getScore(MoveNet.getRightAlbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])
+                                }
+
+                            }
+
 //                            showToast("score: $score")
+
+                            addressScore = bigNum
+
+//                            Log.i("a1 : ", a1.toString())
+//                            Log.i("a2 : ", a2.toString())
+//                            Log.i("a3 : ", a3.toString())
+//                            Log.i("a4 : ", a4.toString())
+                            Log.i("score : ", addressScore.toString())
 
                             push?.start()
                             imgPose.setImageResource(R.drawable.pose2)
@@ -366,11 +383,11 @@ class RecordFragment : Fragment() {
                         }
                         if (sec == 14) {
                             val pose_pushaway = VowlingPose(105.0f, 15.0f, 150.0f, 150.0f, 150.0f)
-                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(1), 105.0f)
-                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(1), 15.0f)
-                            var a3 = getNearValue(MoveNet.getRightHipAngles(1), 150.0f)
-                            var a4 = getNearValue(MoveNet.getRightKneeAngles(1), 150.0f)
-                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(0), 150.0f)
+                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(), 90.0f, 0)
+                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 0.0f, 0)
+                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 160.0f, 0)
+                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 160.0f, 0)
+                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(), 150.0f, 0)
                             pushawayScore = pose_pushaway.getScore(a1, a2, a3, a4, a5)
 //                            showToast(addressScore.toString())
 
@@ -386,12 +403,12 @@ class RecordFragment : Fragment() {
                         }
                         if (sec == 21) {
                             val pose_downswing = VowlingPose(180.0f, 10.0f, 170.0f, 150.0f, 150.0f)
-                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(2), 180.0f)
-                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(2), 10.0f)
-                            var a3 = getNearValue(MoveNet.getRightHipAngles(2), 170.0f)
-                            var a4 = getNearValue(MoveNet.getRightKneeAngles(2), 150.0f)
-                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(1), 150.0f)
-                            downswingScore = pose_downswing.getScore(a1, a2, a3, a4, a5)
+//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(2), 180.0f)
+//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(2), 10.0f)
+//                            var a3 = getNearValue(MoveNet.getRightHipAngles(2), 170.0f)
+//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(2), 150.0f)
+//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(1), 150.0f)
+//                            downswingScore = pose_downswing.getScore(a1, a2, a3, a4, a5)
 //                            showToast(pushawayScore.toString())
 
                             back?.start()
@@ -406,12 +423,12 @@ class RecordFragment : Fragment() {
                         }
                         if (sec == 28) {
                             val pose_backswing = VowlingPose(180.0f, 60.0f, 110.0f, 130.0f, 130.0f)
-                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(3), 180.0f)
-                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(3), 60.0f)
-                            var a3 = getNearValue(MoveNet.getRightHipAngles(3), 110.0f)
-                            var a4 = getNearValue(MoveNet.getRightKneeAngles(3), 130.0f)
-                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(2), 130.0f)
-                            backswingScore = pose_backswing.getScore(a1, a2, a3, a4, a5)
+//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(3), 180.0f)
+//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(3), 60.0f)
+//                            var a3 = getNearValue(MoveNet.getRightHipAngles(3), 110.0f)
+//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(3), 130.0f)
+//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(2), 130.0f)
+//                            backswingScore = pose_backswing.getScore(a1, a2, a3, a4, a5)
 //                            showToast(score.toString())
 
                             forward?.start()
@@ -426,12 +443,12 @@ class RecordFragment : Fragment() {
                         }
                         if (sec == 35) {
                             val pose_forwardswing = VowlingPose(180.0f, 30.0f, 175.0f, 170.0f, 80.0f)
-                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(4), 180.0f)
-                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(4), 30.0f)
-                            var a3 = getNearValue(MoveNet.getRightHipAngles(4), 175.0f)
-                            var a4 = getNearValue(MoveNet.getRightKneeAngles(4), 170.0f)
-                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(3), 80.0f)
-                            forwardswingScore = pose_forwardswing.getScore(a1, a2, a3, a4, a5)
+//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(4), 180.0f)
+//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(4), 30.0f)
+//                            var a3 = getNearValue(MoveNet.getRightHipAngles(4), 175.0f)
+//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(4), 170.0f)
+//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(3), 80.0f)
+//                            forwardswingScore = pose_forwardswing.getScore(a1, a2, a3, a4, a5)
 //                            showToast(score.toString())
 
                             follow?.start()
@@ -446,12 +463,12 @@ class RecordFragment : Fragment() {
                         }
                         if(sec==42){
                             val pose_followthrough = VowlingPose(160.0f, 160.0f, 175.0f, 180.0f, 100.0f)
-                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(5), 160.0f)
-                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(5), 160.0f)
-                            var a3 = getNearValue(MoveNet.getRightHipAngles(5), 175.0f)
-                            var a4 = getNearValue(MoveNet.getRightKneeAngles(5), 180.0f)
-                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(4), 100.0f)
-                            followthroughScore = pose_followthrough.getScore(a1, a2, a3, a4, a5)
+//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(), 160.0f, 0)
+//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 160.0f,0)
+//                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 175.0f,0)
+//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 180.0f, 0)
+//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(), 100.0f, 0)
+//                            followthroughScore = pose_followthrough.getScore(a1, a2, a3, a4, a5)
 //                            showToast(score.toString())
 
 //                    Log.i("MainActivity time", sec.toString())
@@ -480,18 +497,21 @@ class RecordFragment : Fragment() {
 
     }
 
-    private fun getNearValue(targetList: FloatArray,
-                             value: Float): Float {
+    private fun getNearValue(targetList: Array<ArrayList<Float>>,
+                             value: Float, p1: Int): Float {
         var temp: Float
         var min = Float.MAX_VALUE
         var nearValue = 0.0f
 
-        val size = targetList.size
+        for (j in 0 .. 9) {
+            Log.d(TAG, "getNearValue: ${targetList[p1][j]}")
+        }
+        val size = targetList[p1].size
         for (i in 0 until size) {
-            temp = abs(targetList[i] - value)
+            temp = abs(targetList[p1][i] - value)
             if (min > temp) {
                 min = temp
-                nearValue = targetList[i]
+                nearValue = targetList[p1][i]
             }
         }
         return nearValue
