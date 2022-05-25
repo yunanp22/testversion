@@ -20,6 +20,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.hardware.camera2.CameraCharacteristics
 import android.media.MediaPlayer
 import android.media.MediaRecorder
@@ -48,6 +49,7 @@ import org.tensorflow.lite.examples.poseestimation.camera.CameraSource
 import org.tensorflow.lite.examples.poseestimation.data.Device
 import org.tensorflow.lite.examples.poseestimation.data.VowlingPose
 import org.tensorflow.lite.examples.poseestimation.ml.*
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.lang.Math.abs
 import java.text.SimpleDateFormat
@@ -181,6 +183,8 @@ class RecordFragment : Fragment() {
     private var forwardswingScore: Float = 0.0f
     private var followthroughScore: Float = 0.0f
 
+    var resultBitmap: Bitmap? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -236,10 +240,22 @@ class RecordFragment : Fragment() {
                 intent.putExtra("backswingScore", backswingScore)
                 intent.putExtra("forwardswingScore", forwardswingScore)
                 intent.putExtra("followthroughScore", followthroughScore)
+                val stream = ByteArrayOutputStream()
+                resultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+
+
+                intent.putExtra("bitmap", stream.toByteArray())
                 startActivity(intent)
+
 
                 recordButton.setImageResource(R.drawable.ic_record_btn)
             } else {
+//                MoveNet.getBitmap().clear()
+//                MoveNet.getRightAlbowAngles()[0].clear()
+//                MoveNet.getRightHipAngles()[0].clear()
+//                MoveNet.getRightKneeAngles()[0].clear()
+//                MoveNet.getRightShoulderAngles()[0].clear()
+
 
                 outputFile = createFile(safeContext, "mp4")
                 recorder = createRecorder(recorderSurface)
@@ -351,17 +367,26 @@ class RecordFragment : Fragment() {
 //                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 0.0f, 0)
 //                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 160.0f, 0)
 //                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 160.0f, 0)
-                            val listSize = MoveNet.getRightAlbowAngles().size
+                            val listSize = MoveNet.getRightAlbowAngles()[0].size
+                            Log.d(TAG, "onViewCreated: 리스트 $listSize")
+
+//                            Log.d(TAG, "onViewCreated: ${MoveNet.getRightAlbowAngles()[0].size} ${MoveNet.getRightShoulderAngles()[0].size} ${MoveNet.getRightHipAngles()[0].size} ${MoveNet.getRightKneeAngles()[0].size}")
                             var bigNum = pose_address.getScore(MoveNet.getRightAlbowAngles()[0][0], MoveNet.getRightShoulderAngles()[0][0], MoveNet.getRightHipAngles()[0][0], MoveNet.getRightKneeAngles()[0][0])
-                            for(i in 1 .. listSize) {
+                            var bigNumIndex = 0
+
+                            for(i in 1 until listSize) {
 
                                 if(bigNum < pose_address.getScore(MoveNet.getRightAlbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])) {
                                     bigNum = pose_address.getScore(MoveNet.getRightAlbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])
+                                    bigNumIndex = i
                                 }
+
+                                resultBitmap = MoveNet.getBitmap()[bigNumIndex]
 
                             }
 
 //                            showToast("score: $score")
+
 
                             addressScore = bigNum
 
@@ -383,12 +408,12 @@ class RecordFragment : Fragment() {
                         }
                         if (sec == 14) {
                             val pose_pushaway = VowlingPose(105.0f, 15.0f, 150.0f, 150.0f, 150.0f)
-                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(), 90.0f, 0)
-                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 0.0f, 0)
-                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 160.0f, 0)
-                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 160.0f, 0)
-                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(), 150.0f, 0)
-                            pushawayScore = pose_pushaway.getScore(a1, a2, a3, a4, a5)
+//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(), 90.0f, 0)
+//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 0.0f, 0)
+//                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 160.0f, 0)
+//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 160.0f, 0)
+//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(), 150.0f, 0)
+//                            pushawayScore = pose_pushaway.getScore(a1, a2, a3, a4, a5)
 //                            showToast(addressScore.toString())
 
                             down?.start()

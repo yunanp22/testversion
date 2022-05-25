@@ -71,6 +71,8 @@ private var leftKneeAngle3 = ArrayList<Float>()
 private var leftKneeAngle4 = ArrayList<Float>()
 private var leftKneeAngle5 = ArrayList<Float>()
 
+var bitmapList = ArrayList<Bitmap>()
+
 private var rightAlbowAngles = arrayOf(rightAlbowAngle1, rightAlbowAngle2, rightAlbowAngle3, rightAlbowAngle4,
     rightAlbowAngle5, rightAlbowAngle6)
 //private var rightAlbowAngles = arrayOf(rightAlbowAngle1.toFloatArray(), rightAlbowAngle2.toFloatArray(), rightAlbowAngle3.toFloatArray(), rightAlbowAngle4.toFloatArray(),
@@ -177,6 +179,10 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         fun getLeftKneeAngles(): Array<ArrayList<Float>>{
             return leftKneeAngles
         }
+
+        fun getBitmap(): ArrayList<Bitmap> {
+            return bitmapList
+        }
     }
 
     private var cropRegion: RectF? = null
@@ -186,8 +192,10 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
     private var outputShape: IntArray = interpreter.getOutputTensor(0).shape()
 
 
-//    override fun estimatePoses(bitmap: Bitmap): List<Person> {
-override fun estimatePoses(bitmap: Bitmap): List<Person> {
+
+
+    //    override fun estimatePoses(bitmap: Bitmap): List<Person> {
+    override fun estimatePoses(bitmap: Bitmap): List<Person> {
         val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         if (cropRegion == null) {
             cropRegion = initRectF(bitmap.width, bitmap.height)
@@ -355,6 +363,11 @@ override fun estimatePoses(bitmap: Bitmap): List<Person> {
 //        }
 
 
+//        getBitmap().clear()
+//        getRightAlbowAngles()[0].clear()
+//        getRightHipAngles()[0].clear()
+//        getRightKneeAngles()[0].clear()
+//        getRightShoulderAngles()[0].clear()
 
 
     /** 부위별 각도*/
@@ -412,6 +425,9 @@ override fun estimatePoses(bitmap: Bitmap): List<Person> {
 
 
     // rightAlbowAngles, rightShoulderAngles, rightHipAngles, rightKneeAngles, leftKneeAngles
+
+
+
     if(time < 7) {
 
         Log.d("TAG", "estimatePoses: ${rightAlbowAngle}")
@@ -419,6 +435,7 @@ override fun estimatePoses(bitmap: Bitmap): List<Person> {
         rightShoulderAngles[0].add(rightShoulderAngle)
         rightHipAngles[0].add(rightHipAngle)
         rightKneeAngles[0].add(rightKneeAngle)
+        bitmapList.add(bitmap)
 //             return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
 //                 return listOf(Person(keyPoints = keyPoints, score = 100.0f))
         Log.d("TAG", "estimatePoses: ${rightAlbowAngles[0][0]}")
