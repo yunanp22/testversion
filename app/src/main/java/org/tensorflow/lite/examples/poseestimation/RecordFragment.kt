@@ -176,12 +176,21 @@ class RecordFragment : Fragment() {
     private var follow : MediaPlayer? = null
 
 
+    /** 자세별 점수 */
     private var addressScore: Float = 0.0f
     private var pushawayScore: Float = 0.0f
     private var downswingScore: Float = 0.0f
     private var backswingScore: Float = 0.0f
     private var forwardswingScore: Float = 0.0f
     private var followthroughScore: Float = 0.0f
+
+    /** 자세별 각도 차이*/
+    private var addressAngleDifferences = FloatArray(4)
+    private var pushawayAngleDifferences = FloatArray(5)
+    private var downswingAngleDifferences = FloatArray(5)
+    private var backswingAngleDifferences = FloatArray(5)
+    private var forwardswingAngleDifferences = FloatArray(5)
+    private var followthroughAngleDifferences = FloatArray(5)
 
     var resultBitmap: Bitmap? = null
 
@@ -284,224 +293,205 @@ class RecordFragment : Fragment() {
 
                     activity?.runOnUiThread {
                         tvTime?.text = "시간: ${sec}"
-//                        if (sec == 0) {
-//                            address?.start()
-//                            imgPose.setImageResource(R.drawable.pose1)
-//                            imgPose.visibility = View.VISIBLE
-//                            tvPoseName.text = getString(R.string.tv_poseName, "어드레스")
-//                            Log.i("time", sec.toString())
-//                            Log.i("test", MoveNet.getBiggestScore(0).toString())
-//                        }
-//
-//                        if (sec == 2) {
-//                            imgPose.visibility = View.INVISIBLE
-//                        }
-//                        if (sec == 7) {
-//                            push?.start()
-//                            imgPose.setImageResource(R.drawable.pose2)
-//                            imgPose.visibility = View.VISIBLE
-//                            tvPoseName.text = getString(R.string.tv_poseName, "푸시어웨이")
-//                            Log.i("time", sec.toString())
-//                            Log.i("test", MoveNet.getBiggestScore(0).toString())
-//                        }
-//                        if (sec == 9) {
-//                            imgPose.visibility = View.INVISIBLE
-//                        }
-//                        if (sec == 14) {
-//                            down?.start()
-//                            imgPose.setImageResource(R.drawable.pose3)
-//                            imgPose.visibility = View.VISIBLE
-//                            tvPoseName.text = getString(R.string.tv_poseName, "다운스윙")
-//                            Log.i("time", sec.toString())
-//                            Log.i("test", MoveNet.getBiggestScore(1).toString())
-//                        }
-//                        if (sec == 16) {
-//                            imgPose.visibility = View.INVISIBLE
-//                        }
-//                        if (sec == 21) {
-//                            back?.start()
-//                            imgPose.setImageResource(R.drawable.pose4)
-//                            imgPose.visibility = View.VISIBLE
-//                            tvPoseName.text = getString(R.string.tv_poseName, "백스윙")
-//                            Log.i("time", sec.toString())
-//                            Log.i("test", MoveNet.getBiggestScore(2).toString())
-//                        }
-//                        if (sec == 23) {
-//                            imgPose.visibility = View.INVISIBLE
-//                        }
-//                        if (sec == 28) {
-//                            forward?.start()
-//                            imgPose.setImageResource(R.drawable.pose5)
-//                            imgPose.visibility = View.VISIBLE
-//                            tvPoseName.text = getString(R.string.tv_poseName, "포워드스윙")
-//                            Log.i("time", sec.toString())
-//                            Log.i("test", MoveNet.getBiggestScore(3).toString())
-//                        }
-//                        if (sec == 30) {
-//                            imgPose.visibility = View.INVISIBLE
-//                        }
-//                        if (sec == 35) {
-//                            follow?.start()
-//                            imgPose.setImageResource(R.drawable.pose6)
-//                            imgPose.visibility = View.VISIBLE
-//                            tvPoseName.text = getString(R.string.tv_poseName, "팔로스루")
-//                            Log.i("time", sec.toString())
-//                            Log.i("test", MoveNet.getBiggestScore(4).toString())
-//                        }
-//                        if (sec == 37) {
-//                            imgPose.visibility = View.INVISIBLE
-//                        }
-//                        if (sec == 42) {
-//                            Log.i("time", sec.toString())
-//                            Log.i("test", MoveNet.getBiggestScore(5).toString())
-//                        }
 
+                        if (sec == 0) {
+                            address?.start()
+                            imgPose.setImageResource(R.drawable.pose1)
+                            imgPose.visibility = View.VISIBLE
+                            tvPoseName.text = getString(R.string.tv_poseName, "어드레스")
+                        }
 
                         if(sec == 2){
                             imgPose.visibility = View.INVISIBLE
                         }
+
                         if (sec == 7) {
                             /** 정확도가 가장 높았던 각도*/
                             val pose_address = VowlingPose(90.0f, 0.0f, 160.0f, 160.0f)
-//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(), 90.0f, 0)
-//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 0.0f, 0)
-//                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 160.0f, 0)
-//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 160.0f, 0)
-                            val listSize = MoveNet.getRightAlbowAngles()[0].size
-                            Log.d(TAG, "onViewCreated: 리스트 $listSize")
-
-//                            Log.d(TAG, "onViewCreated: ${MoveNet.getRightAlbowAngles()[0].size} ${MoveNet.getRightShoulderAngles()[0].size} ${MoveNet.getRightHipAngles()[0].size} ${MoveNet.getRightKneeAngles()[0].size}")
-                            var bigNum = pose_address.getScore(MoveNet.getRightAlbowAngles()[0][0], MoveNet.getRightShoulderAngles()[0][0], MoveNet.getRightHipAngles()[0][0], MoveNet.getRightKneeAngles()[0][0])
-                            var bigNumIndex = 0
-
+                            val listSize = MoveNet.getRightElbowAngles()[0].size
+                            var maxScore = pose_address.getScore(MoveNet.getRightElbowAngles()[0][0], MoveNet.getRightShoulderAngles()[0][0], MoveNet.getRightHipAngles()[0][0], MoveNet.getRightKneeAngles()[0][0])
+                            var maxScoreIndex = 0
+                            var count = 1
                             for(i in 1 until listSize) {
-
-                                if(bigNum < pose_address.getScore(MoveNet.getRightAlbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])) {
-                                    bigNum = pose_address.getScore(MoveNet.getRightAlbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])
-                                    bigNumIndex = i
+                                if(maxScore < pose_address.getScore(MoveNet.getRightElbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])) {
+                                    maxScore = pose_address.getScore(MoveNet.getRightElbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])
+                                    maxScoreIndex = count
                                 }
-
-                                resultBitmap = MoveNet.getBitmap()[bigNumIndex]
-
+                                count++
                             }
+                            addressScore = maxScore
+                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
 
-//                            showToast("score: $score")
+                            addressAngleDifferences[0] = getAngleDifference(pose_address.getREA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
+                            addressAngleDifferences[1] = getAngleDifference(pose_address.getRSA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
+                            addressAngleDifferences[2] = getAngleDifference(pose_address.getRHA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
+                            addressAngleDifferences[3] = getAngleDifference(pose_address.getRKA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
 
-
-                            addressScore = bigNum
-
-//                            Log.i("a1 : ", a1.toString())
-//                            Log.i("a2 : ", a2.toString())
-//                            Log.i("a3 : ", a3.toString())
-//                            Log.i("a4 : ", a4.toString())
                             Log.i("score : ", addressScore.toString())
 
                             push?.start()
                             imgPose.setImageResource(R.drawable.pose2)
                             imgPose.visibility = View.VISIBLE
                             tvPoseName.text = getString(R.string.tv_poseName, "푸시어웨이")
-//                    Log.i("MainActivity time", sec.toString())
-//                            Log.i("test", score.toString())
                         }
+
                         if(sec == 9){
                             imgPose.visibility = View.INVISIBLE
                         }
+
                         if (sec == 14) {
                             val pose_pushaway = VowlingPose(105.0f, 15.0f, 150.0f, 150.0f, 150.0f)
-//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(), 90.0f, 0)
-//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 0.0f, 0)
-//                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 160.0f, 0)
-//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 160.0f, 0)
-//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(), 150.0f, 0)
-//                            pushawayScore = pose_pushaway.getScore(a1, a2, a3, a4, a5)
-//                            showToast(addressScore.toString())
+                            val listSize = MoveNet.getRightElbowAngles()[1].size
+                            var maxScore = pose_pushaway.getScore(MoveNet.getRightElbowAngles()[1][0], MoveNet.getRightShoulderAngles()[1][0], MoveNet.getRightHipAngles()[1][0], MoveNet.getRightKneeAngles()[1][0], MoveNet.getLeftKneeAngles()[0][0])
+                            var maxScoreIndex = 0
+                            var count = 1
+                            for(i in 1 until listSize) {
+                                if(maxScore < pose_pushaway.getScore(MoveNet.getRightElbowAngles()[1][i], MoveNet.getRightShoulderAngles()[1][i], MoveNet.getRightHipAngles()[1][i], MoveNet.getRightKneeAngles()[1][i], MoveNet.getLeftKneeAngles()[0][i])) {
+                                    maxScore = pose_pushaway.getScore(MoveNet.getRightElbowAngles()[1][i], MoveNet.getRightShoulderAngles()[1][i], MoveNet.getRightHipAngles()[1][i], MoveNet.getRightKneeAngles()[1][i], MoveNet.getLeftKneeAngles()[0][i])
+                                    maxScoreIndex = count
+                                }
+                                count++
+                            }
+                            pushawayScore = maxScore
+                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+
+                            pushawayAngleDifferences[0] = getAngleDifference(pose_pushaway.getREA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[1] = getAngleDifference(pose_pushaway.getRSA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[2] = getAngleDifference(pose_pushaway.getRHA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[3] = getAngleDifference(pose_pushaway.getRKA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[4] = getAngleDifference(pose_pushaway.getLKA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
 
                             down?.start()
                             imgPose.setImageResource(R.drawable.pose3)
                             imgPose.visibility = View.VISIBLE
                             tvPoseName.text = getString(R.string.tv_poseName, "다운스윙")
-//                    Log.i("MainActivity time", sec.toString())
-//                            Log.i("test", addressScore.toString())
                         }
+
                         if(sec == 16){
                             imgPose.visibility = View.INVISIBLE
                         }
+
                         if (sec == 21) {
                             val pose_downswing = VowlingPose(180.0f, 10.0f, 170.0f, 150.0f, 150.0f)
-//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(2), 180.0f)
-//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(2), 10.0f)
-//                            var a3 = getNearValue(MoveNet.getRightHipAngles(2), 170.0f)
-//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(2), 150.0f)
-//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(1), 150.0f)
-//                            downswingScore = pose_downswing.getScore(a1, a2, a3, a4, a5)
-//                            showToast(pushawayScore.toString())
+                            val listSize = MoveNet.getRightElbowAngles()[2].size
+                            var maxScore = pose_downswing.getScore(MoveNet.getRightElbowAngles()[2][0], MoveNet.getRightShoulderAngles()[2][0], MoveNet.getRightHipAngles()[2][0], MoveNet.getRightKneeAngles()[2][0], MoveNet.getLeftKneeAngles()[1][0])
+                            var maxScoreIndex = 0
+                            var count = 1
+                            for(i in 1 until listSize) {
+                                if(maxScore < pose_downswing.getScore(MoveNet.getRightElbowAngles()[2][i], MoveNet.getRightShoulderAngles()[2][i], MoveNet.getRightHipAngles()[2][i], MoveNet.getRightKneeAngles()[2][i], MoveNet.getLeftKneeAngles()[1][i])) {
+                                    maxScore = pose_downswing.getScore(MoveNet.getRightElbowAngles()[2][i], MoveNet.getRightShoulderAngles()[2][i], MoveNet.getRightHipAngles()[2][i], MoveNet.getRightKneeAngles()[2][i], MoveNet.getLeftKneeAngles()[1][i])
+                                    maxScoreIndex = count
+                                }
+                                count++
+                            }
+                            downswingScore = maxScore
+                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+
+                            downswingAngleDifferences[0] = getAngleDifference(pose_downswing.getREA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[1] = getAngleDifference(pose_downswing.getRSA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[2] = getAngleDifference(pose_downswing.getRHA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[3] = getAngleDifference(pose_downswing.getRKA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[4] = getAngleDifference(pose_downswing.getLKA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
 
                             back?.start()
                             imgPose.setImageResource(R.drawable.pose4)
                             imgPose.visibility = View.VISIBLE
                             tvPoseName.text = getString(R.string.tv_poseName, "백스윙")
-//                    Log.i("MainActivity time", sec.toString())
-//                            Log.i("test", score.toString())
                         }
+
                         if(sec == 23){
                             imgPose.visibility = View.INVISIBLE
                         }
+
                         if (sec == 28) {
                             val pose_backswing = VowlingPose(180.0f, 60.0f, 110.0f, 130.0f, 130.0f)
-//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(3), 180.0f)
-//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(3), 60.0f)
-//                            var a3 = getNearValue(MoveNet.getRightHipAngles(3), 110.0f)
-//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(3), 130.0f)
-//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(2), 130.0f)
-//                            backswingScore = pose_backswing.getScore(a1, a2, a3, a4, a5)
-//                            showToast(score.toString())
+                            val listSize = MoveNet.getRightElbowAngles()[3].size
+                            var maxScore = pose_backswing.getScore(MoveNet.getRightElbowAngles()[3][0], MoveNet.getRightShoulderAngles()[3][0], MoveNet.getRightHipAngles()[3][0], MoveNet.getRightKneeAngles()[3][0], MoveNet.getLeftKneeAngles()[2][0])
+                            var maxScoreIndex = 0
+                            var count = 1
+                            for(i in 1 until listSize) {
+                                if(maxScore < pose_backswing.getScore(MoveNet.getRightElbowAngles()[3][i], MoveNet.getRightShoulderAngles()[3][i], MoveNet.getRightHipAngles()[3][i], MoveNet.getRightKneeAngles()[3][i], MoveNet.getLeftKneeAngles()[2][i])) {
+                                    maxScore = pose_backswing.getScore(MoveNet.getRightElbowAngles()[3][i], MoveNet.getRightShoulderAngles()[3][i], MoveNet.getRightHipAngles()[3][i], MoveNet.getRightKneeAngles()[3][i], MoveNet.getLeftKneeAngles()[2][i])
+                                    maxScoreIndex = count
+                                }
+                                count++
+                            }
+                            backswingScore = maxScore
+                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+
+                            backswingAngleDifferences[0] = getAngleDifference(pose_backswing.getREA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[1] = getAngleDifference(pose_backswing.getRSA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[2] = getAngleDifference(pose_backswing.getRHA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[3] = getAngleDifference(pose_backswing.getRKA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[4] = getAngleDifference(pose_backswing.getLKA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
 
                             forward?.start()
                             imgPose.setImageResource(R.drawable.pose5)
                             imgPose.visibility = View.VISIBLE
                             tvPoseName.text = getString(R.string.tv_poseName, "포워드스윙")
-//                    Log.i("MainActivity time", sec.toString())
-//                            Log.i("test", score.toString())
                         }
+
                         if(sec == 30){
                             imgPose.visibility = View.INVISIBLE
                         }
+
                         if (sec == 35) {
                             val pose_forwardswing = VowlingPose(180.0f, 30.0f, 175.0f, 170.0f, 80.0f)
-//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(4), 180.0f)
-//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(4), 30.0f)
-//                            var a3 = getNearValue(MoveNet.getRightHipAngles(4), 175.0f)
-//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(4), 170.0f)
-//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(3), 80.0f)
-//                            forwardswingScore = pose_forwardswing.getScore(a1, a2, a3, a4, a5)
-//                            showToast(score.toString())
+                            val listSize = MoveNet.getRightElbowAngles()[4].size
+                            var maxScore = pose_forwardswing.getScore(MoveNet.getRightElbowAngles()[4][0], MoveNet.getRightShoulderAngles()[4][0], MoveNet.getRightHipAngles()[4][0], MoveNet.getRightKneeAngles()[4][0], MoveNet.getLeftKneeAngles()[3][0])
+                            var maxScoreIndex = 0
+                            var count = 1
+                            for(i in 1 until listSize) {
+                                if(maxScore < pose_forwardswing.getScore(MoveNet.getRightElbowAngles()[4][i], MoveNet.getRightShoulderAngles()[4][i], MoveNet.getRightHipAngles()[4][i], MoveNet.getRightKneeAngles()[4][i], MoveNet.getLeftKneeAngles()[3][i])) {
+                                    maxScore = pose_forwardswing.getScore(MoveNet.getRightElbowAngles()[4][i], MoveNet.getRightShoulderAngles()[4][i], MoveNet.getRightHipAngles()[4][i], MoveNet.getRightKneeAngles()[4][i], MoveNet.getLeftKneeAngles()[3][i])
+                                    maxScoreIndex = count
+                                }
+                                count++
+                            }
+                            forwardswingScore = maxScore
+                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+
+                            forwardswingAngleDifferences[0] = getAngleDifference(pose_forwardswing.getREA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[1] = getAngleDifference(pose_forwardswing.getRSA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[2] = getAngleDifference(pose_forwardswing.getRHA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[3] = getAngleDifference(pose_forwardswing.getRKA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[4] = getAngleDifference(pose_forwardswing.getLKA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
 
                             follow?.start()
                             imgPose.setImageResource(R.drawable.pose6)
                             imgPose.visibility = View.VISIBLE
                             tvPoseName.text = getString(R.string.tv_poseName, "팔로스루")
-//                    Log.i("MainActivity time", sec.toString())
-//                            Log.i("test", score.toString())
                         }
+
                         if(sec == 37){
                             imgPose.visibility = View.INVISIBLE
                         }
+
                         if(sec==42){
                             val pose_followthrough = VowlingPose(160.0f, 160.0f, 175.0f, 180.0f, 100.0f)
-//                            var a1 = getNearValue(MoveNet.getRightAlbowAngles(), 160.0f, 0)
-//                            var a2 = getNearValue(MoveNet.getRightShoulderAngles(), 160.0f,0)
-//                            var a3 = getNearValue(MoveNet.getRightHipAngles(), 175.0f,0)
-//                            var a4 = getNearValue(MoveNet.getRightKneeAngles(), 180.0f, 0)
-//                            var a5 = getNearValue(MoveNet.getLeftKneeAngles(), 100.0f, 0)
-//                            followthroughScore = pose_followthrough.getScore(a1, a2, a3, a4, a5)
-//                            showToast(score.toString())
+                            val listSize = MoveNet.getRightElbowAngles()[5].size
+                            var maxScore = pose_followthrough.getScore(MoveNet.getRightElbowAngles()[5][0], MoveNet.getRightShoulderAngles()[5][0], MoveNet.getRightHipAngles()[5][0], MoveNet.getRightKneeAngles()[5][0], MoveNet.getLeftKneeAngles()[4][0])
+                            var maxScoreIndex = 0
+                            var count = 1
+                            for(i in 1 until listSize) {
+                                if(maxScore < pose_followthrough.getScore(MoveNet.getRightElbowAngles()[5][i], MoveNet.getRightShoulderAngles()[5][i], MoveNet.getRightHipAngles()[5][i], MoveNet.getRightKneeAngles()[5][i], MoveNet.getLeftKneeAngles()[4][i])) {
+                                    maxScore = pose_followthrough.getScore(MoveNet.getRightElbowAngles()[5][i], MoveNet.getRightShoulderAngles()[5][i], MoveNet.getRightHipAngles()[5][i], MoveNet.getRightKneeAngles()[5][i], MoveNet.getLeftKneeAngles()[4][i])
+                                    maxScoreIndex = count
+                                }
+                                count++
+                            }
+                            followthroughScore = maxScore
+                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
 
-//                    Log.i("MainActivity time", sec.toString())
-//                            Log.i("test", score.toString())
+                            followthroughAngleDifferences[0] = getAngleDifference(pose_followthrough.getREA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[1] = getAngleDifference(pose_followthrough.getRSA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[2] = getAngleDifference(pose_followthrough.getRHA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[3] = getAngleDifference(pose_followthrough.getRKA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[4] = getAngleDifference(pose_followthrough.getLKA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
                         }
                     }
-
                 }
+
                 Log.d(TAG, "Recording started")
 
                 recordButton.setImageResource(R.drawable.ic_record_btn_red)
@@ -520,6 +510,10 @@ class RecordFragment : Fragment() {
             navigation.selectedItemId = R.id.menu_home
         }
 
+    }
+
+    private fun getAngleDifference(correctAngle: Float, myAngle: Float): Float{
+        return myAngle - correctAngle
     }
 
     private fun getNearValue(targetList: Array<ArrayList<Float>>,
