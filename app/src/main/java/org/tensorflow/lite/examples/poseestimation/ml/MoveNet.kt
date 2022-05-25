@@ -24,6 +24,7 @@ import android.widget.Toast
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.examples.poseestimation.MainActivity
+import org.tensorflow.lite.examples.poseestimation.RecordFragment
 import org.tensorflow.lite.examples.poseestimation.data.*
 import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
@@ -110,7 +111,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         private const val THUNDER_FILENAME = "movenet_thunder.tflite"
 
         private var time = 0
-        private var timer: Timer? = null
+//        private var timer: Timer? = null
 
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
@@ -127,16 +128,17 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 Device.NNAPI -> options.setUseNNAPI(true)
             }
 
-            timer = Timer()
-            timer?.scheduleAtFixedRate(
-                object : TimerTask() {
-                    override fun run() {
-                        time++
-                    }
-                },
-                0,
-                1000
-            )
+
+//            timer = Timer()
+//            timer?.scheduleAtFixedRate(
+//                object : TimerTask() {
+//                    override fun run() {
+//                        time++
+//                    }
+//                },
+//                0,
+//                1000
+//            )
 
             return MoveNet(
                 Interpreter(
@@ -148,6 +150,10 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 ),
                 gpuDelegate
             )
+        }
+
+        fun setTime(time: Int){
+            this.time = time
         }
 
         // default to lightning.
@@ -413,8 +419,8 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         gpuDelegate?.close()
         interpreter.close()
         cropRegion = null
-        time = 0
-        timer = null
+//        time = 0
+//        timer = null
     }
 
     /**

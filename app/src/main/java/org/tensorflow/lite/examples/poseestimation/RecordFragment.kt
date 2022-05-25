@@ -174,6 +174,7 @@ class RecordFragment : Fragment() {
     private var back : MediaPlayer? = null
     private var forward : MediaPlayer? = null
     private var follow : MediaPlayer? = null
+    private var end: MediaPlayer? = null
 
 
     /** 자세별 점수 */
@@ -241,6 +242,12 @@ class RecordFragment : Fragment() {
                 MediaScannerConnection.scanFile(
                     surfaceView.context, arrayOf(outputFile.absolutePath), null, null
                 )
+//                private var addressAngleDifferences = FloatArray(4)
+//                private var pushawayAngleDifferences = FloatArray(5)
+//                private var downswingAngleDifferences = FloatArray(5)
+//                private var backswingAngleDifferences = FloatArray(5)
+//                private var forwardswingAngleDifferences = FloatArray(5)
+//                private var followthroughAngleDifferences = FloatArray(5)
 
                 val intent = Intent(safeContext, ResultPopupActivity::class.java)
                 intent.putExtra("addressScore", addressScore)
@@ -249,6 +256,12 @@ class RecordFragment : Fragment() {
                 intent.putExtra("backswingScore", backswingScore)
                 intent.putExtra("forwardswingScore", forwardswingScore)
                 intent.putExtra("followthroughScore", followthroughScore)
+                intent.putExtra("addressAngleDifferences", addressAngleDifferences)
+                intent.putExtra("pushawayAngleDifferences", pushawayAngleDifferences)
+                intent.putExtra("downswingAngleDifferences", downswingAngleDifferences)
+                intent.putExtra("backswingAngleDifferences", backswingAngleDifferences)
+                intent.putExtra("forwardswingAngleDifferences", forwardswingAngleDifferences)
+                intent.putExtra("followthroughAngleDifferences", followthroughAngleDifferences)
                 val stream = ByteArrayOutputStream()
                 resultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
 
@@ -278,6 +291,7 @@ class RecordFragment : Fragment() {
 
                 timerTask = kotlin.concurrent.timer(period = 100) {
                     time++
+                    MoveNet.setTime(time)
                     Log.d(TAG, "onViewCreated: $time")
                     val sec = time / 10
                     val fiveSec = time % 70
@@ -301,7 +315,7 @@ class RecordFragment : Fragment() {
                             tvPoseName.text = getString(R.string.tv_poseName, "어드레스")
                         }
 
-                        if(sec == 2){
+                        if(sec == 2) {
                             imgPose.visibility = View.INVISIBLE
                         }
 
@@ -323,10 +337,15 @@ class RecordFragment : Fragment() {
                             resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
 
                             addressAngleDifferences[0] = getAngleDifference(pose_address.getREA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
-                            addressAngleDifferences[1] = getAngleDifference(pose_address.getRSA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
-                            addressAngleDifferences[2] = getAngleDifference(pose_address.getRHA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
-                            addressAngleDifferences[3] = getAngleDifference(pose_address.getRKA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
+                            addressAngleDifferences[1] = getAngleDifference(pose_address.getRSA(), MoveNet.getRightShoulderAngles()[0][maxScoreIndex])
+                            addressAngleDifferences[2] = getAngleDifference(pose_address.getRHA(), MoveNet.getRightHipAngles()[0][maxScoreIndex])
+                            addressAngleDifferences[3] = getAngleDifference(pose_address.getRKA(), MoveNet.getRightKneeAngles()[0][maxScoreIndex])
 
+
+                            Log.i("REA : ", addressAngleDifferences[0].toString())
+                            Log.i("RSA : ", addressAngleDifferences[1].toString())
+                            Log.i("RHA : ", addressAngleDifferences[2].toString())
+                            Log.i("RKA : ", addressAngleDifferences[3].toString())
                             Log.i("score : ", addressScore.toString())
 
                             push?.start()
@@ -334,6 +353,8 @@ class RecordFragment : Fragment() {
                             imgPose.visibility = View.VISIBLE
                             tvPoseName.text = getString(R.string.tv_poseName, "푸시어웨이")
                         }
+
+
 
                         if(sec == 9){
                             imgPose.visibility = View.INVISIBLE
@@ -356,10 +377,18 @@ class RecordFragment : Fragment() {
                             resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
 
                             pushawayAngleDifferences[0] = getAngleDifference(pose_pushaway.getREA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
-                            pushawayAngleDifferences[1] = getAngleDifference(pose_pushaway.getRSA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
-                            pushawayAngleDifferences[2] = getAngleDifference(pose_pushaway.getRHA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
-                            pushawayAngleDifferences[3] = getAngleDifference(pose_pushaway.getRKA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
-                            pushawayAngleDifferences[4] = getAngleDifference(pose_pushaway.getLKA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
+                            pushawayAngleDifferences[1] = getAngleDifference(pose_pushaway.getRSA(), MoveNet.getRightShoulderAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[2] = getAngleDifference(pose_pushaway.getRHA(), MoveNet.getRightHipAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[3] = getAngleDifference(pose_pushaway.getRKA(), MoveNet.getRightKneeAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[4] = getAngleDifference(pose_pushaway.getLKA(), MoveNet.getLeftKneeAngles()[0][maxScoreIndex])
+
+
+                            Log.i("REA : ", pushawayAngleDifferences[0].toString())
+                            Log.i("RSA : ", pushawayAngleDifferences[1].toString())
+                            Log.i("RHA : ", pushawayAngleDifferences[2].toString())
+                            Log.i("RKA : ", pushawayAngleDifferences[3].toString())
+                            Log.i("LKA : ", pushawayAngleDifferences[4].toString())
+                            Log.i("score : ", pushawayScore.toString())
 
                             down?.start()
                             imgPose.setImageResource(R.drawable.pose3)
@@ -388,10 +417,17 @@ class RecordFragment : Fragment() {
                             resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
 
                             downswingAngleDifferences[0] = getAngleDifference(pose_downswing.getREA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
-                            downswingAngleDifferences[1] = getAngleDifference(pose_downswing.getRSA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
-                            downswingAngleDifferences[2] = getAngleDifference(pose_downswing.getRHA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
-                            downswingAngleDifferences[3] = getAngleDifference(pose_downswing.getRKA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
-                            downswingAngleDifferences[4] = getAngleDifference(pose_downswing.getLKA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
+                            downswingAngleDifferences[1] = getAngleDifference(pose_downswing.getRSA(), MoveNet.getRightShoulderAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[2] = getAngleDifference(pose_downswing.getRHA(), MoveNet.getRightHipAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[3] = getAngleDifference(pose_downswing.getRKA(), MoveNet.getRightKneeAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[4] = getAngleDifference(pose_downswing.getLKA(), MoveNet.getLeftKneeAngles()[1][maxScoreIndex])
+
+                            Log.i("REA : ", downswingAngleDifferences[0].toString())
+                            Log.i("RSA : ", downswingAngleDifferences[1].toString())
+                            Log.i("RHA : ", downswingAngleDifferences[2].toString())
+                            Log.i("RKA : ", downswingAngleDifferences[3].toString())
+                            Log.i("LKA : ", downswingAngleDifferences[4].toString())
+                            Log.i("score : ", downswingScore.toString())
 
                             back?.start()
                             imgPose.setImageResource(R.drawable.pose4)
@@ -420,10 +456,17 @@ class RecordFragment : Fragment() {
                             resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
 
                             backswingAngleDifferences[0] = getAngleDifference(pose_backswing.getREA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
-                            backswingAngleDifferences[1] = getAngleDifference(pose_backswing.getRSA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
-                            backswingAngleDifferences[2] = getAngleDifference(pose_backswing.getRHA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
-                            backswingAngleDifferences[3] = getAngleDifference(pose_backswing.getRKA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
-                            backswingAngleDifferences[4] = getAngleDifference(pose_backswing.getLKA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
+                            backswingAngleDifferences[1] = getAngleDifference(pose_backswing.getRSA(), MoveNet.getRightShoulderAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[2] = getAngleDifference(pose_backswing.getRHA(), MoveNet.getRightHipAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[3] = getAngleDifference(pose_backswing.getRKA(), MoveNet.getRightKneeAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[4] = getAngleDifference(pose_backswing.getLKA(), MoveNet.getLeftKneeAngles()[2][maxScoreIndex])
+
+                            Log.i("REA : ", backswingAngleDifferences[0].toString())
+                            Log.i("RSA : ", backswingAngleDifferences[1].toString())
+                            Log.i("RHA : ", backswingAngleDifferences[2].toString())
+                            Log.i("RKA : ", backswingAngleDifferences[3].toString())
+                            Log.i("LKA : ", backswingAngleDifferences[4].toString())
+                            Log.i("score : ", backswingScore.toString())
 
                             forward?.start()
                             imgPose.setImageResource(R.drawable.pose5)
@@ -452,10 +495,17 @@ class RecordFragment : Fragment() {
                             resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
 
                             forwardswingAngleDifferences[0] = getAngleDifference(pose_forwardswing.getREA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
-                            forwardswingAngleDifferences[1] = getAngleDifference(pose_forwardswing.getRSA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
-                            forwardswingAngleDifferences[2] = getAngleDifference(pose_forwardswing.getRHA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
-                            forwardswingAngleDifferences[3] = getAngleDifference(pose_forwardswing.getRKA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
-                            forwardswingAngleDifferences[4] = getAngleDifference(pose_forwardswing.getLKA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
+                            forwardswingAngleDifferences[1] = getAngleDifference(pose_forwardswing.getRSA(), MoveNet.getRightShoulderAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[2] = getAngleDifference(pose_forwardswing.getRHA(), MoveNet.getRightHipAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[3] = getAngleDifference(pose_forwardswing.getRKA(), MoveNet.getRightKneeAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[4] = getAngleDifference(pose_forwardswing.getLKA(), MoveNet.getLeftKneeAngles()[3][maxScoreIndex])
+
+                            Log.i("REA : ", forwardswingAngleDifferences[0].toString())
+                            Log.i("RSA : ", forwardswingAngleDifferences[1].toString())
+                            Log.i("RHA : ", forwardswingAngleDifferences[2].toString())
+                            Log.i("RKA : ", forwardswingAngleDifferences[3].toString())
+                            Log.i("LKA : ", forwardswingAngleDifferences[4].toString())
+                            Log.i("score : ", forwardswingScore.toString())
 
                             follow?.start()
                             imgPose.setImageResource(R.drawable.pose6)
@@ -466,6 +516,7 @@ class RecordFragment : Fragment() {
                         if(sec == 37){
                             imgPose.visibility = View.INVISIBLE
                         }
+
 
                         if(sec==42){
                             val pose_followthrough = VowlingPose(160.0f, 160.0f, 175.0f, 180.0f, 100.0f)
@@ -484,10 +535,19 @@ class RecordFragment : Fragment() {
                             resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
 
                             followthroughAngleDifferences[0] = getAngleDifference(pose_followthrough.getREA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
-                            followthroughAngleDifferences[1] = getAngleDifference(pose_followthrough.getRSA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
-                            followthroughAngleDifferences[2] = getAngleDifference(pose_followthrough.getRHA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
-                            followthroughAngleDifferences[3] = getAngleDifference(pose_followthrough.getRKA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
-                            followthroughAngleDifferences[4] = getAngleDifference(pose_followthrough.getLKA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
+                            followthroughAngleDifferences[1] = getAngleDifference(pose_followthrough.getRSA(), MoveNet.getRightShoulderAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[2] = getAngleDifference(pose_followthrough.getRHA(), MoveNet.getRightHipAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[3] = getAngleDifference(pose_followthrough.getRKA(), MoveNet.getRightKneeAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[4] = getAngleDifference(pose_followthrough.getLKA(), MoveNet.getLeftKneeAngles()[4][maxScoreIndex])
+
+                            Log.i("REA : ", followthroughAngleDifferences[0].toString())
+                            Log.i("RSA : ", followthroughAngleDifferences[1].toString())
+                            Log.i("RHA : ", followthroughAngleDifferences[2].toString())
+                            Log.i("RKA : ", followthroughAngleDifferences[3].toString())
+                            Log.i("LKA : ", followthroughAngleDifferences[4].toString())
+                            Log.i("score : ", followthroughScore.toString())
+
+                            end?.start()
                         }
                     }
                 }
@@ -607,17 +667,13 @@ class RecordFragment : Fragment() {
         follow = MediaPlayer.create(this.safeContext, R.raw.follow_throw)
         forward = MediaPlayer.create(this.safeContext, R.raw.forward)
         down = MediaPlayer.create(this.safeContext, R.raw.down_swing)
+        end = MediaPlayer.create(this.safeContext, R.raw.end)
 
         if (isCameraPermissionGranted()) {
 
             if (cameraSource == null) {
                 cameraSource =
                     CameraSource(surfaceView, object : CameraSource.CameraSourceListener {
-
-//                            override fun onFPSListener(fps: Int) {
-////                                tvFPS.text = getString(R.string.tv_fps, fps)
-////                                tvTime.text = getString(R.string.tv_time, time)
-//                            }
 
                         override fun onTimeListener(time: Int) {
                             tvFPS.text = getString(R.string.tv_time, time)
@@ -704,29 +760,4 @@ class RecordFragment : Fragment() {
             }
         }
     }
-
-//    /**
-//     * Shows an error message dialog.
-//     */
-//    class ErrorDialog : DialogFragment() {
-//
-//        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-//            AlertDialog.Builder(activity)
-//                .setMessage(requireArguments().getString(ARG_MESSAGE))
-//                .setPositiveButton(android.R.string.ok) { _, _ ->
-//                    // do nothing
-//                }
-//                .create()
-//
-//        companion object {
-//
-//            @JvmStatic
-//            private val ARG_MESSAGE = "message"
-//
-//            @JvmStatic
-//            fun newInstance(message: String): ErrorDialog = ErrorDialog().apply {
-//                arguments = Bundle().apply { putString(ARG_MESSAGE, message) }
-//            }
-//        }
-//    }
 }
