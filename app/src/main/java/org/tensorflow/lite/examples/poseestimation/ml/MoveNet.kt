@@ -16,6 +16,7 @@ limitations under the License.
 
 package org.tensorflow.lite.examples.poseestimation.ml
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.*
 import android.os.SystemClock
@@ -296,7 +297,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
     val pose_followthrough = VowlingPose(160.0f, 160.0f, 175.0f, 180.0f, 100.0f)
 
     /** 각 자세 점수*/
-
 
 
     if(time < 7) {
