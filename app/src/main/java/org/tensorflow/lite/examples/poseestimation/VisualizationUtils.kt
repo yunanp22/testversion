@@ -23,10 +23,10 @@ import kotlin.math.max
 
 object VisualizationUtils {
     /** Radius of circle used to draw keypoints.  */
-    private const val CIRCLE_RADIUS = 6f
+    private const val CIRCLE_RADIUS = 8f
 
     /** Width of line used to connected two keypoints.  */
-    private const val LINE_WIDTH = 4f
+    private const val LINE_WIDTH = 12f
 
     /** The text size of the person id that will be displayed when the tracker is available.  */
     private const val PERSON_ID_TEXT_SIZE = 30f
@@ -132,6 +132,7 @@ object VisualizationUtils {
             color = Color.WHITE
             style = Paint.Style.FILL
         }
+
         val paintLine = Paint().apply {
             strokeWidth = LINE_WIDTH
             color = Color.argb(100,255,255,255)
@@ -166,39 +167,62 @@ object VisualizationUtils {
 
         val paintBadLine = Paint().apply {
             strokeWidth = LINE_WIDTH
-            color = Color.argb(100,255,0,0)
+            color = Color.argb(128,255,0,0)
             style = Paint.Style.STROKE
         }
 
         val paintWarningLine = Paint().apply {
             strokeWidth = LINE_WIDTH
-            color = Color.argb(100,255,0,0)
+            color = Color.argb(128,239,163,63)
             style = Paint.Style.STROKE
         }
 
         val paintGoodLine = Paint().apply {
             strokeWidth = LINE_WIDTH
-            color = Color.argb(100,0,255,0)
+            color = Color.argb(128,0,255,0)
             style = Paint.Style.STROKE
         }
-
-
 
         val output = input.copy(Bitmap.Config.ARGB_8888, true)
         val originalSizeCanvas = Canvas(output)
 
         /** 각도에 따라 선 색 바꾸기*/
-        fun setLineColor(angleDifference: Float, pointA: PointF, pointB: PointF){
+
+        fun setPointColor(pointA: PointF, pointB: PointF, paint: Paint){
+
+            originalSizeCanvas.drawCircle(
+                pointA.x,
+                pointA.y,
+                CIRCLE_RADIUS,
+                paint
+            )
+            originalSizeCanvas.drawCircle(
+                pointB.x,
+                pointB.y,
+                CIRCLE_RADIUS,
+                paint
+            )
+
+        }
+
+        fun setLineColor(angleDifference: Float, pointA: PointF, pointB: PointF): Int{
             if(angleDifference > 10 || angleDifference < -10) {
                 originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintBadLine)
+                setPointColor(pointA, pointB, paintBadCircle)
+                return 1
             }
-            else if((angleDifference<=10&&angleDifference>5) || (angleDifference >= -10 && angleDifference < -5)) {
-                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintWarningLine)
-            }
+//            else if((angleDifference<=10&&angleDifference>5) || (angleDifference >= -10 && angleDifference < -5)) {
+//                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintWarningLine)
+//                setPointColor(pointA, pointB, paintWarningCircle)
+//            }
             else {
                 originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintGoodLine)
+                setPointColor(pointA, pointB, paintGoodCircle)
+                return 0
             }
         }
+
+
 
         persons.forEach { person ->
             // draw person id if tracker is enable
@@ -225,16 +249,98 @@ object VisualizationUtils {
              * leftKneeAngle = Pair(BodyPart.LEFT_HIP, BodyPart.LEFT_KNEE), Pair(BodyPart.LEFT_KNEE, BodyPart.LEFT_ANKLE)
              */
 
-            bodyJoints.forEach {
-                val pointA = person.keyPoints[it.first.position].coordinate
-                val pointB = person.keyPoints[it.second.position].coordinate
-                setLineColor(angleDifferences[pose.ordinal]!![0], pointA, pointB)
-                setLineColor(angleDifferences[pose.ordinal]!![1], pointA, pointB)
-                setLineColor(angleDifferences[pose.ordinal]!![2], pointA, pointB)
-                setLineColor(angleDifferences[pose.ordinal]!![3], pointA, pointB)
-                setLineColor(angleDifferences[pose.ordinal]!![4], pointA, pointB)
 
-//                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
+
+                    if(pose == PoseType.ADDRESS) {
+if(setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate) < setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)) {
+    setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+} else {
+    setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+}
+
+                        if(setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate) < setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)) {
+                            setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+                        } else {
+                            setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+                        }
+
+                        if(setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate) < setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)) {
+                            setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)
+                        } else {
+                            setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)
+                        }
+
+                        if(setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate) < setLineColor(angleDifferences[pose.ordinal]!![3], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)) {
+                            setLineColor(angleDifferences[pose.ordinal]!![3], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)
+                        } else {
+                            setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)
+                        }
+
+
+//                        setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+                        setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[8].coordinate, person.keyPoints[10].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![3], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)
+                        setLineColor(angleDifferences[pose.ordinal]!![3], person.keyPoints[14].coordinate, person.keyPoints[16].coordinate)
+                    } else if(
+                        pose == PoseType.PUSHAWAY
+                        || pose == PoseType.DOWNSWING
+                        || pose == PoseType.BACKSWING
+                        || pose == PoseType.FORWARDSWING
+                        || pose == PoseType.FOLLOWTHROUGH
+                    ){
+                        if(setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate) < setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)) {
+                            setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+                        } else {
+                            setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+                        }
+
+                        if(setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate) < setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)) {
+                            setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)
+                        } else {
+                            setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)
+                        }
+
+                        if(setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate) < setLineColor(angleDifferences[pose.ordinal]!![3], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)) {
+                            setLineColor(angleDifferences[pose.ordinal]!![3], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)
+                        } else {
+                            setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)
+                        }
+
+//                        setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+                        setLineColor(angleDifferences[pose.ordinal]!![0], person.keyPoints[8].coordinate, person.keyPoints[10].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[8].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![1], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[6].coordinate, person.keyPoints[12].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![2], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)
+//                        setLineColor(angleDifferences[pose.ordinal]!![3], person.keyPoints[12].coordinate, person.keyPoints[14].coordinate)
+                        setLineColor(angleDifferences[pose.ordinal]!![3], person.keyPoints[14].coordinate, person.keyPoints[16].coordinate)
+                        setLineColor(angleDifferences[pose.ordinal]!![4], person.keyPoints[11].coordinate, person.keyPoints[13].coordinate)
+                        setLineColor(angleDifferences[pose.ordinal]!![4], person.keyPoints[13].coordinate, person.keyPoints[15].coordinate)
+                    }
+
+            bodyJoints.forEach { pair ->
+
+                if(
+                    pair == Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_ELBOW)
+                    || pair == Pair(BodyPart.RIGHT_ELBOW, BodyPart.RIGHT_WRIST)
+                    || pair == Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_HIP)
+                    || pair == Pair(BodyPart.RIGHT_HIP, BodyPart.RIGHT_KNEE)
+                    || pair == Pair(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE)
+                    || pair == Pair(BodyPart.LEFT_HIP, BodyPart.LEFT_KNEE)
+                    || pair == Pair(BodyPart.LEFT_KNEE, BodyPart.LEFT_ANKLE)
+                ) {
+
+                }
+                else {
+                    val pointA = person.keyPoints[pair.first.position].coordinate
+                    val pointB = person.keyPoints[pair.second.position].coordinate
+                    originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
+                }
+
             }
 
             person.keyPoints.forEach { point ->
@@ -250,12 +356,7 @@ object VisualizationUtils {
                     || point.bodyPart == BodyPart.LEFT_KNEE
                 )
                 {
-                    originalSizeCanvas.drawCircle(
-                        point.coordinate.x,
-                        point.coordinate.y,
-                        CIRCLE_RADIUS,
-                        paintWarningCircle
-                    )
+
                 } else {
                     originalSizeCanvas.drawCircle(
                         point.coordinate.x,

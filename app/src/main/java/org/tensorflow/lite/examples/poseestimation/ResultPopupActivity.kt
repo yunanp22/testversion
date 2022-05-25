@@ -3,7 +3,6 @@ package org.tensorflow.lite.examples.poseestimation
 import android.graphics.*
 import android.os.Bundle
 import android.util.Log
-import android.view.SurfaceView
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
