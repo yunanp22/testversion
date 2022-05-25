@@ -18,6 +18,7 @@ package org.tensorflow.lite.examples.poseestimation
 
 import android.Manifest
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -25,10 +26,12 @@ import android.hardware.camera2.CameraCharacteristics
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Process
+import android.provider.MediaStore
 import android.util.Log
 import android.view.*
 import android.widget.*
@@ -51,9 +54,20 @@ import org.tensorflow.lite.examples.poseestimation.data.VowlingPose
 import org.tensorflow.lite.examples.poseestimation.ml.*
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.lang.Math.abs
 import java.text.SimpleDateFormat
 import java.util.*
+
+enum class PoseType(val pose: String) {
+    ADDRESS("ADDRRESS"),
+    PUSHAWAY("PUSHAWAY"),
+    DOWNSWING("DOWNSWING"),
+    BACKSWING("BACKSWING"),
+    FORWARDSWING("FORWARDSWING"),
+    FOLLOWTHROUGH("FOLLOWTHROUGH")
+}
 
 class RecordFragment : Fragment() {
 
@@ -174,6 +188,7 @@ class RecordFragment : Fragment() {
     private var back : MediaPlayer? = null
     private var forward : MediaPlayer? = null
     private var follow : MediaPlayer? = null
+    private var end: MediaPlayer? = null
 
 
     /** 자세별 점수 */
@@ -192,7 +207,13 @@ class RecordFragment : Fragment() {
     private var forwardswingAngleDifferences = FloatArray(5)
     private var followthroughAngleDifferences = FloatArray(5)
 
-    var resultBitmap: Bitmap? = null
+    var addressResultBitmap: Bitmap? = null
+    var pushawayResultBitmap: Bitmap? = null
+    var downswingResultBitmap: Bitmap? = null
+    var backswingResultBitmap: Bitmap? = null
+    var forwardswingResultBitmap: Bitmap? = null
+    var followthroughResultBitmap: Bitmap? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -249,13 +270,44 @@ class RecordFragment : Fragment() {
                 intent.putExtra("backswingScore", backswingScore)
                 intent.putExtra("forwardswingScore", forwardswingScore)
                 intent.putExtra("followthroughScore", followthroughScore)
-                val stream = ByteArrayOutputStream()
-                resultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
 
+                intent.putExtra("addressAngleDifferences", addressAngleDifferences)
+                intent.putExtra("pushawayAngleDifferences", pushawayAngleDifferences)
+                intent.putExtra("downswingAngleDifferences", downswingAngleDifferences)
+                intent.putExtra("backswingAngleDifferences", backswingAngleDifferences)
+                intent.putExtra("forwardswingAngleDifferences", forwardswingAngleDifferences)
+                intent.putExtra("followthroughAngleDifferences", followthroughAngleDifferences)
 
-                intent.putExtra("bitmap", stream.toByteArray())
+                val addressResultURI = saveBitmapAsFile(PoseType.ADDRESS, addressResultBitmap!!)
+                val pushawayResultURI = saveBitmapAsFile(PoseType.PUSHAWAY, pushawayResultBitmap!!)
+                val downswingResultURI = saveBitmapAsFile(PoseType.DOWNSWING, downswingResultBitmap!!)
+                val backswingResultURI = saveBitmapAsFile(PoseType.BACKSWING, backswingResultBitmap!!)
+                val forwardswingResultURI = saveBitmapAsFile(PoseType.FORWARDSWING, forwardswingResultBitmap!!)
+                val followthroughResultURI = saveBitmapAsFile(PoseType.FOLLOWTHROUGH, followthroughResultBitmap!!)
+                intent.putExtra("addressuri", addressResultURI.toString())
+                intent.putExtra("pushawayuri", pushawayResultURI.toString())
+                intent.putExtra("downswinguri", downswingResultURI.toString())
+                intent.putExtra("backswinguri", backswingResultURI.toString())
+                intent.putExtra("forwardswinguri", forwardswingResultURI.toString())
+                intent.putExtra("followthroughuri", followthroughResultURI.toString())
+
+//                Log.d(TAG, "Bitmap: $pushawayResultBitmap")
+//                pushawayResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
+//                intent.putExtra("pushawaybitmap", stream1.toByteArray())
+//
+//                downswingResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
+//                intent.putExtra("downswingbitmap", stream1.toByteArray())
+//
+//                backswingResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
+//                intent.putExtra("backswingbitmap", stream1.toByteArray())
+//
+//                forwardswingResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
+//                intent.putExtra("forwardswingbitmap", stream1.toByteArray())
+//
+//                followthroughResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
+//                intent.putExtra("followthroughbitmap", stream1.toByteArray())
+
                 startActivity(intent)
-
 
                 recordButton.setImageResource(R.drawable.ic_record_btn)
             } else {
@@ -264,7 +316,6 @@ class RecordFragment : Fragment() {
 //                MoveNet.getRightHipAngles()[0].clear()
 //                MoveNet.getRightKneeAngles()[0].clear()
 //                MoveNet.getRightShoulderAngles()[0].clear()
-
 
                 outputFile = createFile(safeContext, "mp4")
                 recorder = createRecorder(recorderSurface)
@@ -278,8 +329,10 @@ class RecordFragment : Fragment() {
 
                 timerTask = kotlin.concurrent.timer(period = 100) {
                     time++
-                    Log.d(TAG, "onViewCreated: $time")
+
+//                    Log.d(TAG, "onViewCreated: $time")
                     val sec = time / 10
+                    MoveNet.setTime(sec)
                     val fiveSec = time % 70
                     if (fiveSec == 14 && sec <= 42) {
                         num4?.start()
@@ -311,23 +364,19 @@ class RecordFragment : Fragment() {
                             val listSize = MoveNet.getRightElbowAngles()[0].size
                             var maxScore = pose_address.getScore(MoveNet.getRightElbowAngles()[0][0], MoveNet.getRightShoulderAngles()[0][0], MoveNet.getRightHipAngles()[0][0], MoveNet.getRightKneeAngles()[0][0])
                             var maxScoreIndex = 0
-                            var count = 1
                             for(i in 1 until listSize) {
                                 if(maxScore < pose_address.getScore(MoveNet.getRightElbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])) {
                                     maxScore = pose_address.getScore(MoveNet.getRightElbowAngles()[0][i], MoveNet.getRightShoulderAngles()[0][i], MoveNet.getRightHipAngles()[0][i], MoveNet.getRightKneeAngles()[0][i])
-                                    maxScoreIndex = count
+                                    maxScoreIndex = i
                                 }
-                                count++
                             }
                             addressScore = maxScore
-                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+                            addressResultBitmap = MoveNet.getBitmap()[0][maxScoreIndex]
 
                             addressAngleDifferences[0] = getAngleDifference(pose_address.getREA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
-                            addressAngleDifferences[1] = getAngleDifference(pose_address.getRSA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
-                            addressAngleDifferences[2] = getAngleDifference(pose_address.getRHA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
-                            addressAngleDifferences[3] = getAngleDifference(pose_address.getRKA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
-
-                            Log.i("score : ", addressScore.toString())
+                            addressAngleDifferences[1] = getAngleDifference(pose_address.getRSA(), MoveNet.getRightShoulderAngles()[0][maxScoreIndex])
+                            addressAngleDifferences[2] = getAngleDifference(pose_address.getRHA(), MoveNet.getRightHipAngles()[0][maxScoreIndex])
+                            addressAngleDifferences[3] = getAngleDifference(pose_address.getRKA(), MoveNet.getRightKneeAngles()[0][maxScoreIndex])
 
                             push?.start()
                             imgPose.setImageResource(R.drawable.pose2)
@@ -344,22 +393,20 @@ class RecordFragment : Fragment() {
                             val listSize = MoveNet.getRightElbowAngles()[1].size
                             var maxScore = pose_pushaway.getScore(MoveNet.getRightElbowAngles()[1][0], MoveNet.getRightShoulderAngles()[1][0], MoveNet.getRightHipAngles()[1][0], MoveNet.getRightKneeAngles()[1][0], MoveNet.getLeftKneeAngles()[0][0])
                             var maxScoreIndex = 0
-                            var count = 1
                             for(i in 1 until listSize) {
                                 if(maxScore < pose_pushaway.getScore(MoveNet.getRightElbowAngles()[1][i], MoveNet.getRightShoulderAngles()[1][i], MoveNet.getRightHipAngles()[1][i], MoveNet.getRightKneeAngles()[1][i], MoveNet.getLeftKneeAngles()[0][i])) {
                                     maxScore = pose_pushaway.getScore(MoveNet.getRightElbowAngles()[1][i], MoveNet.getRightShoulderAngles()[1][i], MoveNet.getRightHipAngles()[1][i], MoveNet.getRightKneeAngles()[1][i], MoveNet.getLeftKneeAngles()[0][i])
-                                    maxScoreIndex = count
+                                    maxScoreIndex = i
                                 }
-                                count++
                             }
                             pushawayScore = maxScore
-                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+                            pushawayResultBitmap = MoveNet.getBitmap()[1][maxScoreIndex]
 
                             pushawayAngleDifferences[0] = getAngleDifference(pose_pushaway.getREA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
-                            pushawayAngleDifferences[1] = getAngleDifference(pose_pushaway.getRSA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
-                            pushawayAngleDifferences[2] = getAngleDifference(pose_pushaway.getRHA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
-                            pushawayAngleDifferences[3] = getAngleDifference(pose_pushaway.getRKA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
-                            pushawayAngleDifferences[4] = getAngleDifference(pose_pushaway.getLKA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
+                            pushawayAngleDifferences[1] = getAngleDifference(pose_pushaway.getRSA(), MoveNet.getRightShoulderAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[2] = getAngleDifference(pose_pushaway.getRHA(), MoveNet.getRightHipAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[3] = getAngleDifference(pose_pushaway.getRKA(), MoveNet.getRightKneeAngles()[1][maxScoreIndex])
+                            pushawayAngleDifferences[4] = getAngleDifference(pose_pushaway.getLKA(), MoveNet.getLeftKneeAngles()[0][maxScoreIndex])
 
                             down?.start()
                             imgPose.setImageResource(R.drawable.pose3)
@@ -376,22 +423,20 @@ class RecordFragment : Fragment() {
                             val listSize = MoveNet.getRightElbowAngles()[2].size
                             var maxScore = pose_downswing.getScore(MoveNet.getRightElbowAngles()[2][0], MoveNet.getRightShoulderAngles()[2][0], MoveNet.getRightHipAngles()[2][0], MoveNet.getRightKneeAngles()[2][0], MoveNet.getLeftKneeAngles()[1][0])
                             var maxScoreIndex = 0
-                            var count = 1
                             for(i in 1 until listSize) {
                                 if(maxScore < pose_downswing.getScore(MoveNet.getRightElbowAngles()[2][i], MoveNet.getRightShoulderAngles()[2][i], MoveNet.getRightHipAngles()[2][i], MoveNet.getRightKneeAngles()[2][i], MoveNet.getLeftKneeAngles()[1][i])) {
                                     maxScore = pose_downswing.getScore(MoveNet.getRightElbowAngles()[2][i], MoveNet.getRightShoulderAngles()[2][i], MoveNet.getRightHipAngles()[2][i], MoveNet.getRightKneeAngles()[2][i], MoveNet.getLeftKneeAngles()[1][i])
-                                    maxScoreIndex = count
+                                    maxScoreIndex = i
                                 }
-                                count++
                             }
                             downswingScore = maxScore
-                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+                            downswingResultBitmap = MoveNet.getBitmap()[2][maxScoreIndex]
 
                             downswingAngleDifferences[0] = getAngleDifference(pose_downswing.getREA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
-                            downswingAngleDifferences[1] = getAngleDifference(pose_downswing.getRSA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
-                            downswingAngleDifferences[2] = getAngleDifference(pose_downswing.getRHA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
-                            downswingAngleDifferences[3] = getAngleDifference(pose_downswing.getRKA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
-                            downswingAngleDifferences[4] = getAngleDifference(pose_downswing.getLKA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
+                            downswingAngleDifferences[1] = getAngleDifference(pose_downswing.getRSA(), MoveNet.getRightShoulderAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[2] = getAngleDifference(pose_downswing.getRHA(), MoveNet.getRightHipAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[3] = getAngleDifference(pose_downswing.getRKA(), MoveNet.getRightKneeAngles()[2][maxScoreIndex])
+                            downswingAngleDifferences[4] = getAngleDifference(pose_downswing.getLKA(), MoveNet.getLeftKneeAngles()[1][maxScoreIndex])
 
                             back?.start()
                             imgPose.setImageResource(R.drawable.pose4)
@@ -408,22 +453,20 @@ class RecordFragment : Fragment() {
                             val listSize = MoveNet.getRightElbowAngles()[3].size
                             var maxScore = pose_backswing.getScore(MoveNet.getRightElbowAngles()[3][0], MoveNet.getRightShoulderAngles()[3][0], MoveNet.getRightHipAngles()[3][0], MoveNet.getRightKneeAngles()[3][0], MoveNet.getLeftKneeAngles()[2][0])
                             var maxScoreIndex = 0
-                            var count = 1
                             for(i in 1 until listSize) {
                                 if(maxScore < pose_backswing.getScore(MoveNet.getRightElbowAngles()[3][i], MoveNet.getRightShoulderAngles()[3][i], MoveNet.getRightHipAngles()[3][i], MoveNet.getRightKneeAngles()[3][i], MoveNet.getLeftKneeAngles()[2][i])) {
                                     maxScore = pose_backswing.getScore(MoveNet.getRightElbowAngles()[3][i], MoveNet.getRightShoulderAngles()[3][i], MoveNet.getRightHipAngles()[3][i], MoveNet.getRightKneeAngles()[3][i], MoveNet.getLeftKneeAngles()[2][i])
-                                    maxScoreIndex = count
+                                    maxScoreIndex = i
                                 }
-                                count++
                             }
                             backswingScore = maxScore
-                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+                            backswingResultBitmap = MoveNet.getBitmap()[3][maxScoreIndex]
 
                             backswingAngleDifferences[0] = getAngleDifference(pose_backswing.getREA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
-                            backswingAngleDifferences[1] = getAngleDifference(pose_backswing.getRSA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
-                            backswingAngleDifferences[2] = getAngleDifference(pose_backswing.getRHA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
-                            backswingAngleDifferences[3] = getAngleDifference(pose_backswing.getRKA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
-                            backswingAngleDifferences[4] = getAngleDifference(pose_backswing.getLKA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
+                            backswingAngleDifferences[1] = getAngleDifference(pose_backswing.getRSA(), MoveNet.getRightShoulderAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[2] = getAngleDifference(pose_backswing.getRHA(), MoveNet.getRightHipAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[3] = getAngleDifference(pose_backswing.getRKA(), MoveNet.getRightKneeAngles()[3][maxScoreIndex])
+                            backswingAngleDifferences[4] = getAngleDifference(pose_backswing.getLKA(), MoveNet.getLeftKneeAngles()[2][maxScoreIndex])
 
                             forward?.start()
                             imgPose.setImageResource(R.drawable.pose5)
@@ -440,22 +483,20 @@ class RecordFragment : Fragment() {
                             val listSize = MoveNet.getRightElbowAngles()[4].size
                             var maxScore = pose_forwardswing.getScore(MoveNet.getRightElbowAngles()[4][0], MoveNet.getRightShoulderAngles()[4][0], MoveNet.getRightHipAngles()[4][0], MoveNet.getRightKneeAngles()[4][0], MoveNet.getLeftKneeAngles()[3][0])
                             var maxScoreIndex = 0
-                            var count = 1
                             for(i in 1 until listSize) {
                                 if(maxScore < pose_forwardswing.getScore(MoveNet.getRightElbowAngles()[4][i], MoveNet.getRightShoulderAngles()[4][i], MoveNet.getRightHipAngles()[4][i], MoveNet.getRightKneeAngles()[4][i], MoveNet.getLeftKneeAngles()[3][i])) {
                                     maxScore = pose_forwardswing.getScore(MoveNet.getRightElbowAngles()[4][i], MoveNet.getRightShoulderAngles()[4][i], MoveNet.getRightHipAngles()[4][i], MoveNet.getRightKneeAngles()[4][i], MoveNet.getLeftKneeAngles()[3][i])
-                                    maxScoreIndex = count
+                                    maxScoreIndex = i
                                 }
-                                count++
                             }
                             forwardswingScore = maxScore
-                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+                            forwardswingResultBitmap = MoveNet.getBitmap()[4][maxScoreIndex]
 
                             forwardswingAngleDifferences[0] = getAngleDifference(pose_forwardswing.getREA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
-                            forwardswingAngleDifferences[1] = getAngleDifference(pose_forwardswing.getRSA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
-                            forwardswingAngleDifferences[2] = getAngleDifference(pose_forwardswing.getRHA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
-                            forwardswingAngleDifferences[3] = getAngleDifference(pose_forwardswing.getRKA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
-                            forwardswingAngleDifferences[4] = getAngleDifference(pose_forwardswing.getLKA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
+                            forwardswingAngleDifferences[1] = getAngleDifference(pose_forwardswing.getRSA(), MoveNet.getRightShoulderAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[2] = getAngleDifference(pose_forwardswing.getRHA(), MoveNet.getRightHipAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[3] = getAngleDifference(pose_forwardswing.getRKA(), MoveNet.getRightKneeAngles()[4][maxScoreIndex])
+                            forwardswingAngleDifferences[4] = getAngleDifference(pose_forwardswing.getLKA(), MoveNet.getLeftKneeAngles()[3][maxScoreIndex])
 
                             follow?.start()
                             imgPose.setImageResource(R.drawable.pose6)
@@ -472,22 +513,22 @@ class RecordFragment : Fragment() {
                             val listSize = MoveNet.getRightElbowAngles()[5].size
                             var maxScore = pose_followthrough.getScore(MoveNet.getRightElbowAngles()[5][0], MoveNet.getRightShoulderAngles()[5][0], MoveNet.getRightHipAngles()[5][0], MoveNet.getRightKneeAngles()[5][0], MoveNet.getLeftKneeAngles()[4][0])
                             var maxScoreIndex = 0
-                            var count = 1
                             for(i in 1 until listSize) {
                                 if(maxScore < pose_followthrough.getScore(MoveNet.getRightElbowAngles()[5][i], MoveNet.getRightShoulderAngles()[5][i], MoveNet.getRightHipAngles()[5][i], MoveNet.getRightKneeAngles()[5][i], MoveNet.getLeftKneeAngles()[4][i])) {
                                     maxScore = pose_followthrough.getScore(MoveNet.getRightElbowAngles()[5][i], MoveNet.getRightShoulderAngles()[5][i], MoveNet.getRightHipAngles()[5][i], MoveNet.getRightKneeAngles()[5][i], MoveNet.getLeftKneeAngles()[4][i])
-                                    maxScoreIndex = count
+                                    maxScoreIndex = i
                                 }
-                                count++
                             }
                             followthroughScore = maxScore
-                            resultBitmap = MoveNet.getBitmap()[maxScoreIndex]
+                            followthroughResultBitmap = MoveNet.getBitmap()[5][maxScoreIndex]
 
                             followthroughAngleDifferences[0] = getAngleDifference(pose_followthrough.getREA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
-                            followthroughAngleDifferences[1] = getAngleDifference(pose_followthrough.getRSA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
-                            followthroughAngleDifferences[2] = getAngleDifference(pose_followthrough.getRHA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
-                            followthroughAngleDifferences[3] = getAngleDifference(pose_followthrough.getRKA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
-                            followthroughAngleDifferences[4] = getAngleDifference(pose_followthrough.getLKA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
+                            followthroughAngleDifferences[1] = getAngleDifference(pose_followthrough.getRSA(), MoveNet.getRightShoulderAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[2] = getAngleDifference(pose_followthrough.getRHA(), MoveNet.getRightHipAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[3] = getAngleDifference(pose_followthrough.getRKA(), MoveNet.getRightKneeAngles()[5][maxScoreIndex])
+                            followthroughAngleDifferences[4] = getAngleDifference(pose_followthrough.getLKA(), MoveNet.getLeftKneeAngles()[4][maxScoreIndex])
+
+                            end?.start()
                         }
                     }
                 }
@@ -512,29 +553,54 @@ class RecordFragment : Fragment() {
 
     }
 
+    private fun saveBitmapAsFile(pose: PoseType, bitmap: Bitmap): Uri {
+
+        val wrapper = ContextWrapper(requireActivity().applicationContext)
+
+//        val path = File(safeContext.externalCacheDir, "image")
+//        if(!path.exists()){
+//            path.mkdirs()
+//        }
+//        var path = Environment.getExternalStoragePublicDirectory(
+//            Environment.DIRECTORY_PICTURES)
+        var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
+        file = File(file, "${pose.pose}.jpg")
+//        var imageFile: OutputStream? = null
+        try{
+            val stream: OutputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            stream.flush()
+            stream.close()
+        }catch (e: Exception){
+            null
+        }
+
+        return Uri.parse(file.absolutePath)
+    }
+
     private fun getAngleDifference(correctAngle: Float, myAngle: Float): Float{
         return myAngle - correctAngle
     }
 
-    private fun getNearValue(targetList: Array<ArrayList<Float>>,
-                             value: Float, p1: Int): Float {
-        var temp: Float
-        var min = Float.MAX_VALUE
-        var nearValue = 0.0f
-
-        for (j in 0 .. 9) {
-            Log.d(TAG, "getNearValue: ${targetList[p1][j]}")
-        }
-        val size = targetList[p1].size
-        for (i in 0 until size) {
-            temp = abs(targetList[p1][i] - value)
-            if (min > temp) {
-                min = temp
-                nearValue = targetList[p1][i]
-            }
-        }
-        return nearValue
-    }
+//    private fun getNearValue(targetList: Array<ArrayList<Float>>,
+//                             value: Float, p1: Int): Float {
+//        var temp: Float
+//        var min = Float.MAX_VALUE
+//        var nearValue = 0.0f
+//
+//        for (j in 0 .. 9) {
+//            Log.d(TAG, "getNearValue: ${targetList[p1][j]}")
+//        }
+//        val size = targetList[p1].size
+//        for (i in 0 until size) {
+//            temp = abs(targetList[p1][i] - value)
+//            if (min > temp) {
+//                min = temp
+//                nearValue = targetList[p1][i]
+//            }
+//        }
+//        return nearValue
+//    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -607,6 +673,7 @@ class RecordFragment : Fragment() {
         follow = MediaPlayer.create(this.safeContext, R.raw.follow_throw)
         forward = MediaPlayer.create(this.safeContext, R.raw.forward)
         down = MediaPlayer.create(this.safeContext, R.raw.down_swing)
+        end = MediaPlayer.create(this.safeContext, R.raw.end)
 
         if (isCameraPermissionGranted()) {
 

@@ -71,7 +71,12 @@ private var leftKneeAngle3 = ArrayList<Float>()
 private var leftKneeAngle4 = ArrayList<Float>()
 private var leftKneeAngle5 = ArrayList<Float>()
 
-var bitmapList = ArrayList<Bitmap>()
+var addressBitmapList = ArrayList<Bitmap>()
+var pushawayBitmapList = ArrayList<Bitmap>()
+var downswingBitmapList = ArrayList<Bitmap>()
+var backswingBitmapList = ArrayList<Bitmap>()
+var forwardswingBitmapList = ArrayList<Bitmap>()
+var followthroughBitmapList = ArrayList<Bitmap>()
 
 private var rightElbowAngles = arrayOf(rightElbowAngle1, rightElbowAngle2, rightElbowAngle3, rightElbowAngle4,
     rightElbowAngle5, rightElbowAngle6)
@@ -85,6 +90,7 @@ private var rightKneeAngles = arrayOf(rightKneeAngle1, rightKneeAngle2, rightKne
 private var leftKneeAngles = arrayOf(leftKneeAngle1, leftKneeAngle2, leftKneeAngle3,
     leftKneeAngle4, leftKneeAngle5)
 
+var bitmapArray = arrayOf(addressBitmapList, pushawayBitmapList, downswingBitmapList, backswingBitmapList, forwardswingBitmapList, followthroughBitmapList)
 
 private var biggestScore = FloatArray(6)
 
@@ -110,7 +116,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         private const val THUNDER_FILENAME = "movenet_thunder.tflite"
 
         private var time = 0
-        private var timer: Timer? = null
+//        private var timer: Timer? = null
 
         // allow specifying model type.
         fun create(context: Context, device: Device, modelType: ModelType): MoveNet {
@@ -126,17 +132,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
                 }
                 Device.NNAPI -> options.setUseNNAPI(true)
             }
-
-            timer = Timer()
-            timer?.scheduleAtFixedRate(
-                object : TimerTask() {
-                    override fun run() {
-                        time++
-                    }
-                },
-                0,
-                1000
-            )
 
             return MoveNet(
                 Interpreter(
@@ -178,8 +173,12 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             return leftKneeAngles
         }
 
-        fun getBitmap(): ArrayList<Bitmap> {
-            return bitmapList
+        fun getBitmap(): Array<ArrayList<Bitmap>> {
+            return bitmapArray
+        }
+
+        fun setTime(time: Int) {
+            this.time = time
         }
     }
 
@@ -266,7 +265,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         }
         lastInferenceTimeNanos =
             SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
-
+//        Log.d("TAG", "setTime: $time")
 
     /** 부위별 각도*/
     val rightElbowAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate, keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate,keyPoints[BodyPart.RIGHT_WRIST.position].coordinate)
@@ -300,7 +299,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         rightShoulderAngles[0].add(rightShoulderAngle)
         rightHipAngles[0].add(rightHipAngle)
         rightKneeAngles[0].add(rightKneeAngle)
-        bitmapList.add(bitmap)
+        addressBitmapList.add(bitmap)
     }
 
     else if(time < 14) {
@@ -309,6 +308,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         rightHipAngles[1].add(rightHipAngle)
         rightKneeAngles[1].add(rightKneeAngle)
         leftKneeAngles[0].add(leftKneeAngle)
+        pushawayBitmapList.add(bitmap)
     }
 
     else if(time < 21) {
@@ -317,6 +317,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         rightHipAngles[2].add(rightHipAngle)
         rightKneeAngles[2].add(rightKneeAngle)
         leftKneeAngles[1].add(leftKneeAngle)
+        downswingBitmapList.add(bitmap)
     }
 
     else if(time < 28) {
@@ -325,6 +326,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         rightHipAngles[3].add(rightHipAngle)
         rightKneeAngles[3].add(rightKneeAngle)
         leftKneeAngles[2].add(leftKneeAngle)
+        backswingBitmapList.add(bitmap)
     }
 
     else if(time < 35) {
@@ -333,6 +335,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         rightHipAngles[4].add(rightHipAngle)
         rightKneeAngles[4].add(rightKneeAngle)
         leftKneeAngles[3].add(leftKneeAngle)
+        forwardswingBitmapList.add(bitmap)
     }
 
     else if(time < 42){
@@ -341,6 +344,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         rightHipAngles[5].add(rightHipAngle)
         rightKneeAngles[5].add(rightKneeAngle)
         leftKneeAngles[4].add(leftKneeAngle)
+        followthroughBitmapList.add(bitmap)
     }
 
     return listOf(Person(keyPoints = keyPoints, score = 100.0f))
@@ -413,8 +417,8 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         gpuDelegate?.close()
         interpreter.close()
         cropRegion = null
-        time = 0
-        timer = null
+//        time = 0
+//        timer = null
     }
 
     /**

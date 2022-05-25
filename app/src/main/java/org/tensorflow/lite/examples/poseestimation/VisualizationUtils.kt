@@ -56,6 +56,7 @@ object VisualizationUtils {
         Pair(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE)
     )
 
+
     // Draw line and point indicate body pose
     fun drawBodyKeypoints(
         input: Bitmap,
@@ -119,6 +120,8 @@ object VisualizationUtils {
 
     // Draw line and point indicate body pose
     fun drawBodyKeypointsByScore(
+        pose: PoseType,
+        angleDifferences: Array<FloatArray?>,
         input: Bitmap,
         persons: List<Person>,
         isTrackerEnabled: Boolean = false,
@@ -183,6 +186,20 @@ object VisualizationUtils {
 
         val output = input.copy(Bitmap.Config.ARGB_8888, true)
         val originalSizeCanvas = Canvas(output)
+
+        /** 각도에 따라 선 색 바꾸기*/
+        fun setLineColor(angleDifference: Float, pointA: PointF, pointB: PointF){
+            if(angleDifference > 10 || angleDifference < -10) {
+                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintBadLine)
+            }
+            else if((angleDifference<=10&&angleDifference>5) || (angleDifference >= -10 && angleDifference < -5)) {
+                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintWarningLine)
+            }
+            else {
+                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintGoodLine)
+            }
+        }
+
         persons.forEach { person ->
             // draw person id if tracker is enable
             if (isTrackerEnabled) {
@@ -199,10 +216,25 @@ object VisualizationUtils {
                     originalSizeCanvas.drawRect(it, paintLine)
                 }
             }
+
+            /**
+             * rightElbowAngle = Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_ELBOW), Pair(BodyPart.RIGHT_ELBOW, BodyPart.RIGHT_WRIST)
+             * rightShoulderAngle = Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_ELBOW), Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_HIP)
+             * rightHipAngle = Pair(BodyPart.RIGHT_SHOULDER, BodyPart.RIGHT_HIP), Pair(BodyPart.RIGHT_HIP, BodyPart.RIGHT_KNEE)
+             * right KneeAngle = Pair(BodyPart.RIGHT_HIP, BodyPart.RIGHT_KNEE), Pair(BodyPart.RIGHT_KNEE, BodyPart.RIGHT_ANKLE)
+             * leftKneeAngle = Pair(BodyPart.LEFT_HIP, BodyPart.LEFT_KNEE), Pair(BodyPart.LEFT_KNEE, BodyPart.LEFT_ANKLE)
+             */
+
             bodyJoints.forEach {
                 val pointA = person.keyPoints[it.first.position].coordinate
                 val pointB = person.keyPoints[it.second.position].coordinate
-                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
+                setLineColor(angleDifferences[pose.ordinal]!![0], pointA, pointB)
+                setLineColor(angleDifferences[pose.ordinal]!![1], pointA, pointB)
+                setLineColor(angleDifferences[pose.ordinal]!![2], pointA, pointB)
+                setLineColor(angleDifferences[pose.ordinal]!![3], pointA, pointB)
+                setLineColor(angleDifferences[pose.ordinal]!![4], pointA, pointB)
+
+//                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
             }
 
             person.keyPoints.forEach { point ->
