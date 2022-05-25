@@ -31,7 +31,6 @@ class OnBoardActivity : AppCompatActivity() {
             startActivity(i)
             finish()
         }
-
         setContentView(R.layout.activity_onboarding)
 
         tabLayout = findViewById(R.id.dots_indicator)
