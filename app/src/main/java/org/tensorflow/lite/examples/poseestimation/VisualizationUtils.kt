@@ -81,7 +81,6 @@ object VisualizationUtils {
 
 
 
-
         val output = input.copy(Bitmap.Config.ARGB_8888, true)
         val originalSizeCanvas = Canvas(output)
         persons.forEach { person ->
@@ -113,6 +112,127 @@ object VisualizationUtils {
                     CIRCLE_RADIUS,
                     paintCircle
                 )
+            }
+        }
+        return output
+    }
+
+    // Draw line and point indicate body pose
+    fun drawBodyKeypointsByScore(
+        input: Bitmap,
+        persons: List<Person>,
+        isTrackerEnabled: Boolean = false,
+        score: Float = 50.0f
+    ): Bitmap {
+        val paintCircle = Paint().apply {
+            strokeWidth = CIRCLE_RADIUS
+            color = Color.WHITE
+            style = Paint.Style.FILL
+        }
+        val paintLine = Paint().apply {
+            strokeWidth = LINE_WIDTH
+            color = Color.argb(100,255,255,255)
+            style = Paint.Style.STROKE
+        }
+
+        val paintText = Paint().apply {
+            textSize = PERSON_ID_TEXT_SIZE
+            color = Color.BLUE
+            textAlign = Paint.Align.LEFT
+        }
+
+        val paintBadCircle = Paint().apply {
+            strokeWidth = CIRCLE_RADIUS
+            color = Color.RED
+            style = Paint.Style.FILL
+
+        }
+
+        val paintWarningCircle = Paint().apply {
+            strokeWidth = CIRCLE_RADIUS
+            color = Color.argb(255, 239, 163, 63)
+            style = Paint.Style.FILL
+
+        }
+
+        val paintGoodCircle = Paint().apply {
+            strokeWidth = CIRCLE_RADIUS
+            color = Color.GREEN
+            style = Paint.Style.FILL
+        }
+
+        val paintBadLine = Paint().apply {
+            strokeWidth = LINE_WIDTH
+            color = Color.argb(100,255,0,0)
+            style = Paint.Style.STROKE
+        }
+
+        val paintWarningLine = Paint().apply {
+            strokeWidth = LINE_WIDTH
+            color = Color.argb(100,255,0,0)
+            style = Paint.Style.STROKE
+        }
+
+        val paintGoodLine = Paint().apply {
+            strokeWidth = LINE_WIDTH
+            color = Color.argb(100,0,255,0)
+            style = Paint.Style.STROKE
+        }
+
+
+
+        val output = input.copy(Bitmap.Config.ARGB_8888, true)
+        val originalSizeCanvas = Canvas(output)
+        persons.forEach { person ->
+            // draw person id if tracker is enable
+            if (isTrackerEnabled) {
+                person.boundingBox?.let {
+                    val personIdX = max(0f, it.left)
+                    val personIdY = max(0f, it.top)
+
+                    originalSizeCanvas.drawText(
+                        person.id.toString(),
+                        personIdX,
+                        personIdY - PERSON_ID_MARGIN,
+                        paintText
+                    )
+                    originalSizeCanvas.drawRect(it, paintLine)
+                }
+            }
+            bodyJoints.forEach {
+                val pointA = person.keyPoints[it.first.position].coordinate
+                val pointB = person.keyPoints[it.second.position].coordinate
+                originalSizeCanvas.drawLine(pointA.x, pointA.y, pointB.x, pointB.y, paintLine)
+            }
+
+            person.keyPoints.forEach { point ->
+
+                if(point.bodyPart == BodyPart.RIGHT_SHOULDER
+                    || point.bodyPart == BodyPart.RIGHT_ELBOW
+                    || point.bodyPart == BodyPart.RIGHT_ANKLE
+                    || point.bodyPart == BodyPart.RIGHT_HIP
+                    || point.bodyPart == BodyPart.RIGHT_WRIST
+                    || point.bodyPart == BodyPart.RIGHT_KNEE
+                    || point.bodyPart == BodyPart.LEFT_ANKLE
+                    || point.bodyPart == BodyPart.LEFT_HIP
+                    || point.bodyPart == BodyPart.LEFT_KNEE
+                )
+                {
+                    originalSizeCanvas.drawCircle(
+                        point.coordinate.x,
+                        point.coordinate.y,
+                        CIRCLE_RADIUS,
+                        paintWarningCircle
+                    )
+                } else {
+                    originalSizeCanvas.drawCircle(
+                        point.coordinate.x,
+                        point.coordinate.y,
+                        CIRCLE_RADIUS,
+                        paintCircle
+                    )
+                }
+
             }
         }
         return output

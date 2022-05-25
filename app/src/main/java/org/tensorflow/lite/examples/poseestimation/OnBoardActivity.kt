@@ -40,7 +40,7 @@ class OnBoardActivity : AppCompatActivity() {
         loginOnboard = findViewById(R.id.onboard_login)
 
         val onBoardingData : MutableList<OnBoardingData> = ArrayList()
-        onBoardingData.add(OnBoardingData("볼링 자세 연습을 집에서!", "볼링 자세를 연습해보고 싶은데 \n 볼링장을 가기는 귀찮은 당신.. \n 이제 볼링쌤을 통해 집에서 볼링 자세를 연습해봐요!", R.drawable.confidence, "간편하게"))
+        onBoardingData.add(OnBoardingData("볼링 자세 연습을 집에서!", "볼링 자세를 연습해보고 싶은데 \n 볼링장을 가기는 귀찮은 당신.. \n 이제 볼링쌤을 통해 집에서 볼링 자세를 연습해봐요!", R.drawable.bowling_pose1, "간편하게"))
         onBoardingData.add(OnBoardingData("잘못된 자세에 대한 빠른 피드백!","내 자세의 문제점은 무엇인지 확인하고 \n 문제점에 대한 피드백을 받으세요!  \n 자세별로 피드백을 확인할 수 있어요!", R.drawable.feedback, "빠른 피드백"))
         onBoardingData.add(OnBoardingData("볼링을 아예 모르신다구요?", "그런 당신을 위해! \n 볼링쌤은 자세별 영상을 제공합니다! \n자세를 상세하게 나누어 남녀노소 구분없이 이용할 수 있어요!", R.drawable.family, "초보자들을 위한"))
         onBoardingData.add(OnBoardingData("완성된 볼링 자세를!!", "볼링쌤으로 자세를 연습하고 \n 가족,친구,지인들에게 \n 완성된 볼링 자세를 보여주세요!", R.drawable.confidence, "볼림쌤으로"))
