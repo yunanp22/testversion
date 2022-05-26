@@ -61,6 +61,7 @@ class ResultPopupActivity: AppCompatActivity() {
         var score4 = intent.getFloatExtra("backswingScore", 0.0f)
         var score5 = intent.getFloatExtra("forwardswingScore", 0.0f)
         var score6 = intent.getFloatExtra("followthroughScore", 0.0f)
+        Log.d("TAG", "score1 : ${score1}")
 
         var addressResultURI = intent.getStringExtra("addressuri")
         var pushawayResultURI = intent.getStringExtra("pushawayuri")
@@ -68,13 +69,15 @@ class ResultPopupActivity: AppCompatActivity() {
         var backswingResultURI = intent.getStringExtra("backswinguri")
         var forwardswingResultURI = intent.getStringExtra("forwardswinguri")
         var followthroughResultURI = intent.getStringExtra("followthroughuri")
+        Log.d("TAG", "addressResultURI : ${addressResultURI}")
 
-        val addressBitmap = BitmapFactory.decodeFile(addressResultURI)
-        val pushawayBitmap = BitmapFactory.decodeFile(pushawayResultURI)
-        val downswingBitmap = BitmapFactory.decodeFile(downswingResultURI)
-        val backswingBitmap = BitmapFactory.decodeFile(backswingResultURI)
-        val forwardswingBitmap = BitmapFactory.decodeFile(forwardswingResultURI)
-        val followthroughBitmap = BitmapFactory.decodeFile(followthroughResultURI)
+        var addressBitmap = BitmapFactory.decodeFile(addressResultURI)
+        var pushawayBitmap = BitmapFactory.decodeFile(pushawayResultURI)
+        var downswingBitmap = BitmapFactory.decodeFile(downswingResultURI)
+        var backswingBitmap = BitmapFactory.decodeFile(backswingResultURI)
+        var forwardswingBitmap = BitmapFactory.decodeFile(forwardswingResultURI)
+        var followthroughBitmap = BitmapFactory.decodeFile(followthroughResultURI)
+        Log.d("TAG", "addressBitmap : ${addressBitmap}")
 
         var addressAngleDifferences = intent.getFloatArrayExtra("addressAngleDifferences")
         var pushawayAngleDifferences = intent.getFloatArrayExtra("pushawayAngleDifferences")
@@ -82,6 +85,7 @@ class ResultPopupActivity: AppCompatActivity() {
         var backswingAngleDifferences = intent.getFloatArrayExtra("backswingAngleDifferences")
         var forwardswingAngleDifferences = intent.getFloatArrayExtra("forwardswingAngleDifferences")
         var followthroughAngleDifferences = intent.getFloatArrayExtra("followthroughAngleDifferences")
+        Log.d("TAG", "addressAngleDifferences : ${addressAngleDifferences}")
 
         poseAngleDifferences = arrayOf(addressAngleDifferences, pushawayAngleDifferences,
             downswingAngleDifferences, backswingAngleDifferences, forwardswingAngleDifferences, followthroughAngleDifferences)
@@ -142,6 +146,7 @@ class ResultPopupActivity: AppCompatActivity() {
 
 
             okButton.setOnClickListener {
+                MoveNet.resetInfo()
                 finish()
             }
         }
@@ -156,7 +161,7 @@ class ResultPopupActivity: AppCompatActivity() {
             MoveNet.create(this@ResultPopupActivity, Device.CPU, ModelType.Lightning).estimatePoses(bitmap)?.let {
                 persons.addAll(it)
             }
-            Log.d("TAG", "onCreate: ${persons.size}")
+//            Log.d("TAG", "onCreate: ${persons.size}")
             return visualize(pose, persons, bitmap, array)
 
     }

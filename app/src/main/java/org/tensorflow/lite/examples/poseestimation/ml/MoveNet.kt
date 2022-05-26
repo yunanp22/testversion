@@ -34,6 +34,7 @@ import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import org.tensorflow.lite.examples.poseestimation.camera.CameraSource
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.*
 
 
@@ -153,6 +154,25 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             return biggestScore[poseNum]
         }
 
+        fun resetInfo(){
+            resetAngleArray(rightElbowAngles)
+            resetAngleArray(rightShoulderAngles)
+            resetAngleArray(rightHipAngles)
+            resetAngleArray(rightKneeAngles)
+            resetAngleArray(leftKneeAngles)
+            resetBitmapArray(bitmapArray)
+        }
+
+        fun resetAngleArray(array:Array<ArrayList<Float>>){
+            for(i in 0 until array.size)
+                array[i].clear()
+        }
+
+        fun resetBitmapArray(array:Array<ArrayList<Bitmap>>){
+            for(i in 0 until array.size)
+                array[i].clear()
+        }
+
         fun getRightElbowAngles(): Array<ArrayList<Float>>{
             return rightElbowAngles
         }
@@ -267,111 +287,92 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
 //        Log.d("TAG", "setTime: $time")
 
-    /** 부위별 각도*/
-    val rightElbowAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate, keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate,keyPoints[BodyPart.RIGHT_WRIST.position].coordinate)
-    val rightShoulderAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate, keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,keyPoints[BodyPart.RIGHT_HIP.position].coordinate)
-    val rightHipAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,keyPoints[BodyPart.RIGHT_HIP.position].coordinate,keyPoints[BodyPart.RIGHT_KNEE.position].coordinate)
-    val leftKneeAngleArray = arrayOf(keyPoints[BodyPart.LEFT_HIP.position].coordinate,keyPoints[BodyPart.LEFT_KNEE.position].coordinate,keyPoints[BodyPart.LEFT_ANKLE.position].coordinate)
-    val rightKneeAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_HIP.position].coordinate,keyPoints[BodyPart.RIGHT_KNEE.position].coordinate,keyPoints[BodyPart.RIGHT_ANKLE.position].coordinate)
-    val rightElbowAngle = getAngle(rightElbowAngleArray)
-    val rightShoulderAngle = getAngle(rightShoulderAngleArray)
-    val rightHipAngle = getAngle(rightHipAngleArray)
-    val leftKneeAngle = getAngle(leftKneeAngleArray)
-    val rightKneeAngle = getAngle(rightKneeAngleArray)
+        /** 부위별 각도*/
+        val rightElbowAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate, keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate,keyPoints[BodyPart.RIGHT_WRIST.position].coordinate)
+        val rightShoulderAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate, keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,keyPoints[BodyPart.RIGHT_HIP.position].coordinate)
+        val rightHipAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,keyPoints[BodyPart.RIGHT_HIP.position].coordinate,keyPoints[BodyPart.RIGHT_KNEE.position].coordinate)
+        val leftKneeAngleArray = arrayOf(keyPoints[BodyPart.LEFT_HIP.position].coordinate,keyPoints[BodyPart.LEFT_KNEE.position].coordinate,keyPoints[BodyPart.LEFT_ANKLE.position].coordinate)
+        val rightKneeAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_HIP.position].coordinate,keyPoints[BodyPart.RIGHT_KNEE.position].coordinate,keyPoints[BodyPart.RIGHT_ANKLE.position].coordinate)
+        val rightElbowAngle = getAngle(rightElbowAngleArray)
+        val rightShoulderAngle = getAngle(rightShoulderAngleArray)
+        val rightHipAngle = getAngle(rightHipAngleArray)
+        val leftKneeAngle = getAngle(leftKneeAngleArray)
+        val rightKneeAngle = getAngle(rightKneeAngleArray)
 
 
-    /** 각 자세 인스턴스 생성*/
-    val pose_address = VowlingPose(90.0f, 0.0f, 160.0f, 160.0f)
-    val pose_pushaway = VowlingPose(105.0f, 15.0f, 150.0f, 150.0f, 150.0f)
-    val pose_downswing = VowlingPose(180.0f, 10.0f, 170.0f, 150.0f, 150.0f)
-    val pose_backswing = VowlingPose(180.0f, 60.0f, 110.0f, 130.0f, 130.0f)
-    val pose_forwardswing = VowlingPose(180.0f, 30.0f, 175.0f, 170.0f, 80.0f)
-    val pose_followthrough = VowlingPose(160.0f, 160.0f, 175.0f, 180.0f, 100.0f)
+        /** 각 자세 인스턴스 생성*/
+        val pose_address = VowlingPose(90.0f, 0.0f, 160.0f, 160.0f)
+        val pose_pushaway = VowlingPose(105.0f, 15.0f, 150.0f, 150.0f, 150.0f)
+        val pose_downswing = VowlingPose(180.0f, 10.0f, 170.0f, 150.0f, 150.0f)
+        val pose_backswing = VowlingPose(180.0f, 60.0f, 110.0f, 130.0f, 130.0f)
+        val pose_forwardswing = VowlingPose(180.0f, 30.0f, 175.0f, 170.0f, 80.0f)
+        val pose_followthrough = VowlingPose(160.0f, 160.0f, 175.0f, 180.0f, 100.0f)
 
-    /** 각 자세 점수*/
+        /** 각 자세 점수*/
 
 
 
-    if(time < 7) {
+        if(time < 7) {
 
-        Log.d("TAG", "estimatePoses: ${rightElbowAngle}")
-        rightElbowAngles[0].add(rightElbowAngle)
-        rightShoulderAngles[0].add(rightShoulderAngle)
-        rightHipAngles[0].add(rightHipAngle)
-        rightKneeAngles[0].add(rightKneeAngle)
-        addressBitmapList.add(bitmap)
+            Log.d("TAG", "estimatePoses: ${rightElbowAngle}")
+            rightElbowAngles[0].add(rightElbowAngle)
+            rightShoulderAngles[0].add(rightShoulderAngle)
+            rightHipAngles[0].add(rightHipAngle)
+            rightKneeAngles[0].add(rightKneeAngle)
+            addressBitmapList.add(bitmap)
+        }
+
+        else if(time < 14) {
+            rightElbowAngles[1].add(rightElbowAngle)
+            rightShoulderAngles[1].add(rightShoulderAngle)
+            rightHipAngles[1].add(rightHipAngle)
+            rightKneeAngles[1].add(rightKneeAngle)
+            leftKneeAngles[0].add(leftKneeAngle)
+            pushawayBitmapList.add(bitmap)
+        }
+
+        else if(time < 21) {
+            rightElbowAngles[2].add(rightElbowAngle)
+            rightShoulderAngles[2].add(rightShoulderAngle)
+            rightHipAngles[2].add(rightHipAngle)
+            rightKneeAngles[2].add(rightKneeAngle)
+            leftKneeAngles[1].add(leftKneeAngle)
+            downswingBitmapList.add(bitmap)
+        }
+
+        else if(time < 28) {
+            rightElbowAngles[3].add(rightElbowAngle)
+            rightShoulderAngles[3].add(rightShoulderAngle)
+            rightHipAngles[3].add(rightHipAngle)
+            rightKneeAngles[3].add(rightKneeAngle)
+            leftKneeAngles[2].add(leftKneeAngle)
+            backswingBitmapList.add(bitmap)
+        }
+
+        else if(time < 35) {
+            rightElbowAngles[4].add(rightElbowAngle)
+            rightShoulderAngles[4].add(rightShoulderAngle)
+            rightHipAngles[4].add(rightHipAngle)
+            rightKneeAngles[4].add(rightKneeAngle)
+            leftKneeAngles[3].add(leftKneeAngle)
+            forwardswingBitmapList.add(bitmap)
+        }
+
+        else if(time < 42){
+            rightElbowAngles[5].add(rightElbowAngle)
+            rightShoulderAngles[5].add(rightShoulderAngle)
+            rightHipAngles[5].add(rightHipAngle)
+            rightKneeAngles[5].add(rightKneeAngle)
+            leftKneeAngles[4].add(leftKneeAngle)
+            followthroughBitmapList.add(bitmap)
+        }
+
+        return listOf(Person(keyPoints = keyPoints, score = 100.0f))
+
     }
 
-    else if(time < 14) {
-        rightElbowAngles[1].add(rightElbowAngle)
-        rightShoulderAngles[1].add(rightShoulderAngle)
-        rightHipAngles[1].add(rightHipAngle)
-        rightKneeAngles[1].add(rightKneeAngle)
-        leftKneeAngles[0].add(leftKneeAngle)
-        pushawayBitmapList.add(bitmap)
-    }
-
-    else if(time < 21) {
-        rightElbowAngles[2].add(rightElbowAngle)
-        rightShoulderAngles[2].add(rightShoulderAngle)
-        rightHipAngles[2].add(rightHipAngle)
-        rightKneeAngles[2].add(rightKneeAngle)
-        leftKneeAngles[1].add(leftKneeAngle)
-        downswingBitmapList.add(bitmap)
-    }
-
-    else if(time < 28) {
-        rightElbowAngles[3].add(rightElbowAngle)
-        rightShoulderAngles[3].add(rightShoulderAngle)
-        rightHipAngles[3].add(rightHipAngle)
-        rightKneeAngles[3].add(rightKneeAngle)
-        leftKneeAngles[2].add(leftKneeAngle)
-        backswingBitmapList.add(bitmap)
-    }
-
-    else if(time < 35) {
-        rightElbowAngles[4].add(rightElbowAngle)
-        rightShoulderAngles[4].add(rightShoulderAngle)
-        rightHipAngles[4].add(rightHipAngle)
-        rightKneeAngles[4].add(rightKneeAngle)
-        leftKneeAngles[3].add(leftKneeAngle)
-        forwardswingBitmapList.add(bitmap)
-    }
-
-    else if(time < 42){
-        rightElbowAngles[5].add(rightElbowAngle)
-        rightShoulderAngles[5].add(rightShoulderAngle)
-        rightHipAngles[5].add(rightHipAngle)
-        rightKneeAngles[5].add(rightKneeAngle)
-        leftKneeAngles[4].add(leftKneeAngle)
-        followthroughBitmapList.add(bitmap)
-    }
-
-    return listOf(Person(keyPoints = keyPoints, score = 100.0f))
-
-
-//    return listOf(Person(keyPoints = keyPoints, score = addressScore.toFloat()))
-//    return listOf(Person(keyPoints = keyPoints, score = totalScore / numKeyPoints))
-    }
-
-//    fun getAngle(a1: PointF, a2: PointF, a3: PointF): Double {
-//        val p1: Double = hypot(((a1.x) - (a2.x)).toDouble(), ((a1.y) - (a2.y)).toDouble())
-//        val p2: Double = hypot(((a2.x) - (a3.x)).toDouble(), ((a2.y) - (a3.y)).toDouble())
-//        val p3: Double = hypot(((a3.x) - (a1.x)).toDouble(), ((a3.y) - (a1.y)).toDouble())
-//        val radian: Double = acos((p1 * p1 + p2 * p2 - p3 * p3) / (2 * p1 * p2))
-//        return radian / PI * 180
-//    }
-//    fun getAngle(angleArray: Array<PointF>): Double {
-//    Log.d("TAG", "getAngle: ${angleArray[0]}, ${angleArray[1]}, ${angleArray[2]}")
-//        val p1: Double = hypot(((angleArray[0].x) - (angleArray[1].x)).toDouble(), ((angleArray[0].y) - (angleArray[1].y)).toDouble())
-//        val p2: Double = hypot(((angleArray[1].x) - (angleArray[2].x)).toDouble(), ((angleArray[1].y) - (angleArray[2].y)).toDouble())
-//        val p3: Double = hypot(((angleArray[2].x) - (angleArray[0].x)).toDouble(), ((angleArray[2].y) - (angleArray[0].y)).toDouble())
-//        val radian: Double = acos((p1 * p1 + p2 * p2 - p3 * p3) / (2 * p1 * p2))
-//        return radian / PI * 180
-//    }
 
     fun getAngle(angleArray: Array<PointF>): Float {
-//        Log.d("TAG", "getAngle: ${angleArray[0]}, ${angleArray[1]}, ${angleArray[2]}")
         val p1: Float = hypot(((angleArray[0].x) - (angleArray[1].x)), ((angleArray[0].y) - (angleArray[1].y)))
         val p2: Float = hypot(((angleArray[1].x) - (angleArray[2].x)), ((angleArray[1].y) - (angleArray[2].y)))
         val p3: Float = hypot(((angleArray[2].x) - (angleArray[0].x)), ((angleArray[2].y) - (angleArray[0].y)))
@@ -379,37 +380,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         return radian / PI.toFloat() * 180.0f
     }
 
-    fun getScore(pose: VowlingPose, a1: Float, a2: Float, a3: Float, a4: Float): Float {
-        var pose1 = pose.correctRightElbowAngle - a1
-        if(pose1 < 0.0f) {
-            pose1 = -pose1
-        }
-
-        var pose2 = pose.correctRightShoulderAngle - a2
-        if(pose2 < 0.0f) {
-            pose2 = -pose2
-        }
-
-        var pose3 = pose.correctRightHipAngle - a3
-        if(pose3 < 0.0f) {
-            pose3 = -pose3
-        }
-
-        var pose4 = pose.correctRightKneeAngle - a4
-        if(pose4 < 0.0f) {
-            pose4 = -pose4
-        }
-
-        var result = 100 - (pose1 + pose2 + pose3 + pose4)
-        if (result < 0.0f) {
-            result = 0.0f
-        } else if(result > 100.0f) {
-            result = 100.0f
-        }
-
-        return result
-
-    }
 
     override fun lastInferenceTimeNanos(): Long = lastInferenceTimeNanos
 
