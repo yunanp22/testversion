@@ -727,24 +727,24 @@ class RecordFragment : Fragment() {
     }
 
 
-    private fun requestPermission() {
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
-                this.safeContext,
-                Manifest.permission.CAMERA
-            ) -> {
-                // You can use the API that requires the permission.
-                openCamera()
-            }
-            else -> {
-                // You can directly ask for the permission.
-                // The registered ActivityResultCallback gets the result of this request.
-                requestPermissionLauncher.launch(
-                    Manifest.permission.CAMERA
-                )
-            }
-        }
-    }
+//    private fun requestPermission() {
+//        when (PackageManager.PERMISSION_GRANTED) {
+//            ContextCompat.checkSelfPermission(
+//                this.safeContext,
+//                Manifest.permission.CAMERA
+//            ) -> {
+//                // You can use the API that requires the permission.
+//                openCamera()
+//            }
+//            else -> {
+//                // You can directly ask for the permission.
+//                // The registered ActivityResultCallback gets the result of this request.
+//                requestPermissionLauncher.launch(
+//                    Manifest.permission.CAMERA
+//                )
+//            }
+//        }
+//    }
 
     private fun showToast(message: String) {
         Toast.makeText(this.safeContext, message, Toast.LENGTH_LONG).show()
