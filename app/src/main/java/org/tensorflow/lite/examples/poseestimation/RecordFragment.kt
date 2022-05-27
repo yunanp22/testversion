@@ -22,6 +22,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.hardware.camera2.CameraCharacteristics
 import android.media.MediaPlayer
 import android.media.MediaRecorder
@@ -95,6 +96,9 @@ class RecordFragment : Fragment() {
 
         private const val RECORDER_VIDEO_BITRATE: Int = 10_000_000
 
+
+
+
         /** 자세별 점수 */
         private var addressScore: Float = 0.0f
         private var pushawayScore: Float = 0.0f
@@ -111,7 +115,6 @@ class RecordFragment : Fragment() {
         private var backswingAngleDifferences = FloatArray(5)
         private var forwardswingAngleDifferences = FloatArray(5)
         private var followthroughAngleDifferences = FloatArray(5)
-
 
         private var addressResultBitmap: Bitmap? = null
         private var pushawayResultBitmap: Bitmap? = null
@@ -147,7 +150,6 @@ class RecordFragment : Fragment() {
             for(i in 0 until array.size)
                 array[i] = 0.0f
         }
-
 
     }
 
@@ -246,38 +248,9 @@ class RecordFragment : Fragment() {
     private var follow : MediaPlayer? = null
     private var end: MediaPlayer? = null
 
-
-//    /** 자세별 점수 */
-//    private var addressScore: Float = 0.0f
-//    private var pushawayScore: Float = 0.0f
-//    private var downswingScore: Float = 0.0f
-//    private var backswingScore: Float = 0.0f
-//    private var forwardswingScore: Float = 0.0f
-//    private var followthroughScore: Float = 0.0f
-////    private var poseScoreList : ArrayList<Float> = arrayListOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
-//
-//    /** 자세별 각도 차이*/
-//    private var addressAngleDifferences = FloatArray(4)
-//    private var pushawayAngleDifferences = FloatArray(5)
-//    private var downswingAngleDifferences = FloatArray(5)
-//    private var backswingAngleDifferences = FloatArray(5)
-//    private var forwardswingAngleDifferences = FloatArray(5)
-//    private var followthroughAngleDifferences = FloatArray(5)
-//
-//
-//    var addressResultBitmap: Bitmap? = null
-//    var pushawayResultBitmap: Bitmap? = null
-//    var downswingResultBitmap: Bitmap? = null
-//    var backswingResultBitmap: Bitmap? = null
-//    var forwardswingResultBitmap: Bitmap? = null
-//    var followthroughResultBitmap: Bitmap? = null
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
-
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -290,6 +263,8 @@ class RecordFragment : Fragment() {
         tvPoseName =  view.rootView.findViewById(R.id.tvPoseName)
         surfaceView =  view.rootView.findViewById(R.id.surfaceView)
         imgPose =  view.rootView.findViewById(R.id.imgPose)
+
+        var defaultBitmapURI = Uri.parse("android.resource://" + requireActivity().packageName + "/" + R.drawable.bowling)
 
         //Bottom Sheet 위치 설정(MainActivity의 Bottom Navigation Bar와 위치가 충돌되는 문제 예방)
         bottomSheet = view.rootView.findViewById<LinearLayoutCompat>(R.id.score_sheet)
@@ -338,12 +313,12 @@ class RecordFragment : Fragment() {
                 intent.putExtra("forwardswingAngleDifferences", forwardswingAngleDifferences)
                 intent.putExtra("followthroughAngleDifferences", followthroughAngleDifferences)
 
-                val addressResultURI = saveBitmapAsFile(PoseType.ADDRESS, addressResultBitmap!!)
-                val pushawayResultURI = saveBitmapAsFile(PoseType.PUSHAWAY, pushawayResultBitmap!!)
-                val downswingResultURI = saveBitmapAsFile(PoseType.DOWNSWING, downswingResultBitmap!!)
-                val backswingResultURI = saveBitmapAsFile(PoseType.BACKSWING, backswingResultBitmap!!)
-                val forwardswingResultURI = saveBitmapAsFile(PoseType.FORWARDSWING, forwardswingResultBitmap!!)
-                val followthroughResultURI = saveBitmapAsFile(PoseType.FOLLOWTHROUGH, followthroughResultBitmap!!)
+                val addressResultURI = saveBitmapAsFile(PoseType.ADDRESS, addressResultBitmap)
+                val pushawayResultURI = saveBitmapAsFile(PoseType.PUSHAWAY, pushawayResultBitmap)
+                val downswingResultURI = saveBitmapAsFile(PoseType.DOWNSWING, downswingResultBitmap)
+                val backswingResultURI = saveBitmapAsFile(PoseType.BACKSWING, backswingResultBitmap)
+                val forwardswingResultURI = saveBitmapAsFile(PoseType.FORWARDSWING, forwardswingResultBitmap)
+                val followthroughResultURI = saveBitmapAsFile(PoseType.FOLLOWTHROUGH, followthroughResultBitmap)
                 intent.putExtra("addressuri", addressResultURI.toString())
                 intent.putExtra("pushawayuri", pushawayResultURI.toString())
                 intent.putExtra("downswinguri", downswingResultURI.toString())
@@ -589,7 +564,7 @@ class RecordFragment : Fragment() {
 
     }
 
-    private fun saveBitmapAsFile(pose: PoseType, bitmap: Bitmap): Uri {
+    private fun saveBitmapAsFile(pose: PoseType, bitmap: Bitmap?): Uri? {
 
         val wrapper = ContextWrapper(requireActivity().applicationContext)
 
@@ -604,7 +579,7 @@ class RecordFragment : Fragment() {
 //        var imageFile: OutputStream? = null
         try{
             val stream: OutputStream = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, stream)
             stream.flush()
             stream.close()
         }catch (e: Exception){

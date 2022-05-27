@@ -107,6 +107,8 @@ class ResultPopupActivity: AppCompatActivity() {
                         comment.text = "어드레스 점수: $score1"
                         if(addressBitmap != null) {
                             imageView.setImageBitmap(setBitmap(PoseType.ADDRESS, addressBitmap, poseAngleDifferences))
+                        }  else {
+                            imageView.setImageResource(R.drawable.bowling)
                         }
                         feedbackAddressAngleDiffernce(addressAngleDifferences!!)
 
@@ -114,30 +116,40 @@ class ResultPopupActivity: AppCompatActivity() {
                         comment.text = "푸쉬어웨이 점수: $score2"
                         if(pushawayBitmap != null) {
                             imageView.setImageBitmap(setBitmap(PoseType.PUSHAWAY, pushawayBitmap, poseAngleDifferences))
+                        } else {
+                            imageView.setImageResource(R.drawable.bowling)
                         }
                         feedbackPushAngleDiffernce(pushawayAngleDifferences!!)
                     } else if (getSelectedSpinnerItem() == 2) {
                         comment.text = "다운스윙 점수: $score3"
                         if(downswingBitmap != null) {
                             imageView.setImageBitmap(setBitmap(PoseType.DOWNSWING, downswingBitmap, poseAngleDifferences))
+                        } else {
+                            imageView.setImageResource(R.drawable.bowling)
                         }
                         feedbackDownAngleDiffernce(downswingAngleDifferences!!)
                     } else if (getSelectedSpinnerItem() == 3) {
                         comment.text = "백스윙 점수: $score4"
                         if(backswingBitmap != null) {
                             imageView.setImageBitmap(setBitmap(PoseType.BACKSWING, backswingBitmap, poseAngleDifferences))
+                        } else {
+                            imageView.setImageResource(R.drawable.bowling)
                         }
                         feedbackBackAngleDiffernce(backswingAngleDifferences!!)
                     } else if (getSelectedSpinnerItem() == 4) {
                         comment.text = "포워드 점수: $score5"
                         if(forwardswingBitmap != null) {
                             imageView.setImageBitmap(setBitmap(PoseType.FORWARDSWING, forwardswingBitmap, poseAngleDifferences))
+                        } else {
+                            imageView.setImageResource(R.drawable.bowling)
                         }
                         feedbackForwardAngleDiffernce(forwardswingAngleDifferences!!)
                     } else {
                         comment.text = "팔로우스루 점수: $score6"
                         if(followthroughBitmap != null) {
                             imageView.setImageBitmap(setBitmap(PoseType.FOLLOWTHROUGH, followthroughBitmap, poseAngleDifferences))
+                        } else {
+                            imageView.setImageResource(R.drawable.bowling)
                         }
                         feedbackFollowAngleDiffernce(followthroughAngleDifferences!!)
                     }
