@@ -95,6 +95,59 @@ class RecordFragment : Fragment() {
 
         private const val RECORDER_VIDEO_BITRATE: Int = 10_000_000
 
+        /** 자세별 점수 */
+        private var addressScore: Float = 0.0f
+        private var pushawayScore: Float = 0.0f
+        private var downswingScore: Float = 0.0f
+        private var backswingScore: Float = 0.0f
+        private var forwardswingScore: Float = 0.0f
+        private var followthroughScore: Float = 0.0f
+//    private var poseScoreList : ArrayList<Float> = arrayListOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+
+        /** 자세별 각도 차이*/
+        private var addressAngleDifferences = FloatArray(4)
+        private var pushawayAngleDifferences = FloatArray(5)
+        private var downswingAngleDifferences = FloatArray(5)
+        private var backswingAngleDifferences = FloatArray(5)
+        private var forwardswingAngleDifferences = FloatArray(5)
+        private var followthroughAngleDifferences = FloatArray(5)
+
+
+        private var addressResultBitmap: Bitmap? = null
+        private var pushawayResultBitmap: Bitmap? = null
+        private var downswingResultBitmap: Bitmap? = null
+        private var backswingResultBitmap: Bitmap? = null
+        private var forwardswingResultBitmap: Bitmap? = null
+        private var followthroughResultBitmap: Bitmap? = null
+
+        fun resetRecordedInfo(){
+            addressScore = 0.0f
+            pushawayScore = 0.0f
+            downswingScore = 0.0f
+            backswingScore = 0.0f
+            forwardswingScore = 0.0f
+            followthroughScore = 0.0f
+
+            resetArray(addressAngleDifferences)
+            resetArray(pushawayAngleDifferences)
+            resetArray(downswingAngleDifferences)
+            resetArray(backswingAngleDifferences)
+            resetArray(forwardswingAngleDifferences)
+            resetArray(followthroughAngleDifferences)
+
+            addressResultBitmap = null
+            pushawayResultBitmap = null
+            downswingResultBitmap = null
+            backswingResultBitmap = null
+            forwardswingResultBitmap = null
+            followthroughResultBitmap = null
+        }
+
+        fun resetArray(array: FloatArray){
+            for(i in 0 until array.size)
+                array[i] = 0.0f
+        }
+
 
     }
 
@@ -194,30 +247,30 @@ class RecordFragment : Fragment() {
     private var end: MediaPlayer? = null
 
 
-    /** 자세별 점수 */
-    private var addressScore: Float = 0.0f
-    private var pushawayScore: Float = 0.0f
-    private var downswingScore: Float = 0.0f
-    private var backswingScore: Float = 0.0f
-    private var forwardswingScore: Float = 0.0f
-    private var followthroughScore: Float = 0.0f
-//    private var poseScoreList : ArrayList<Float> = arrayListOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
-
-    /** 자세별 각도 차이*/
-    private var addressAngleDifferences = FloatArray(4)
-    private var pushawayAngleDifferences = FloatArray(5)
-    private var downswingAngleDifferences = FloatArray(5)
-    private var backswingAngleDifferences = FloatArray(5)
-    private var forwardswingAngleDifferences = FloatArray(5)
-    private var followthroughAngleDifferences = FloatArray(5)
-
-
-    var addressResultBitmap: Bitmap? = null
-    var pushawayResultBitmap: Bitmap? = null
-    var downswingResultBitmap: Bitmap? = null
-    var backswingResultBitmap: Bitmap? = null
-    var forwardswingResultBitmap: Bitmap? = null
-    var followthroughResultBitmap: Bitmap? = null
+//    /** 자세별 점수 */
+//    private var addressScore: Float = 0.0f
+//    private var pushawayScore: Float = 0.0f
+//    private var downswingScore: Float = 0.0f
+//    private var backswingScore: Float = 0.0f
+//    private var forwardswingScore: Float = 0.0f
+//    private var followthroughScore: Float = 0.0f
+////    private var poseScoreList : ArrayList<Float> = arrayListOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+//
+//    /** 자세별 각도 차이*/
+//    private var addressAngleDifferences = FloatArray(4)
+//    private var pushawayAngleDifferences = FloatArray(5)
+//    private var downswingAngleDifferences = FloatArray(5)
+//    private var backswingAngleDifferences = FloatArray(5)
+//    private var forwardswingAngleDifferences = FloatArray(5)
+//    private var followthroughAngleDifferences = FloatArray(5)
+//
+//
+//    var addressResultBitmap: Bitmap? = null
+//    var pushawayResultBitmap: Bitmap? = null
+//    var downswingResultBitmap: Bitmap? = null
+//    var backswingResultBitmap: Bitmap? = null
+//    var forwardswingResultBitmap: Bitmap? = null
+//    var followthroughResultBitmap: Bitmap? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -556,6 +609,7 @@ class RecordFragment : Fragment() {
             stream.close()
         }catch (e: Exception){
             null
+//            e.message
         }
 
         return Uri.parse(file.absolutePath)

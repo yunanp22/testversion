@@ -1,6 +1,7 @@
 package org.tensorflow.lite.examples.poseestimation
 
 import android.graphics.*
+import android.icu.text.AlphabeticIndex
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -146,6 +147,7 @@ class ResultPopupActivity: AppCompatActivity() {
 
 
             okButton.setOnClickListener {
+                RecordFragment.resetRecordedInfo()
                 MoveNet.resetInfo()
                 finish()
             }
