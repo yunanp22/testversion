@@ -48,22 +48,10 @@ class VowlingPose {
         return this.correctLeftKneeAngle
     }
 
-
-
-//    fun getScore(a1: Double, a2: Double, a3: Double, a4: Double): Double {
-//        return 100 - (correctRightElbowAngle - a1 + correctRightShoulderAngle - a2 +
-//                correctRightHipAngle - a3 + correctRightKneeAngle - a4).absoluteValue
-//    }
-
     fun getScore(a1: Float, a2: Float, a3: Float, a4: Float): Float {
         return 100 - ((correctRightElbowAngle - a1).absoluteValue + (correctRightShoulderAngle - a2).absoluteValue +
-                (correctRightHipAngle - a3).absoluteValue + (correctRightKneeAngle - a4))
+                (correctRightHipAngle - a3).absoluteValue + (correctRightKneeAngle - a4).absoluteValue)
     }
-
-//    fun getScore(a1: Double, a2: Double, a3: Double, a4: Double, a5: Double): Double {
-//        return 100 - (correctRightElbowAngle - a1 + correctRightShoulderAngle - a2 +
-//                correctRightHipAngle - a3 + correctRightKneeAngle - a4 + correctLeftKneeAngle - a5).absoluteValue
-//    }
 
     fun getScore(a1: Float, a2: Float, a3: Float, a4: Float, a5: Float): Float {
         return 100 - ((correctRightElbowAngle - a1).absoluteValue + (correctRightShoulderAngle - a2).absoluteValue +

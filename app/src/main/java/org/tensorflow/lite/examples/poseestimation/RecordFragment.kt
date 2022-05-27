@@ -59,6 +59,7 @@ import java.io.OutputStream
 import java.lang.Math.abs
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 enum class PoseType(val pose: String) {
     ADDRESS("ADDRRESS"),
@@ -88,10 +89,12 @@ class RecordFragment : Fragment() {
             return RecordFragment()
         }
 
+
         private const val PREVIEW_WIDTH = 640
         private const val PREVIEW_HEIGHT = 480
 
         private const val RECORDER_VIDEO_BITRATE: Int = 10_000_000
+
 
     }
 
@@ -198,6 +201,7 @@ class RecordFragment : Fragment() {
     private var backswingScore: Float = 0.0f
     private var forwardswingScore: Float = 0.0f
     private var followthroughScore: Float = 0.0f
+//    private var poseScoreList : ArrayList<Float> = arrayListOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
 
     /** 자세별 각도 차이*/
     private var addressAngleDifferences = FloatArray(4)
@@ -206,6 +210,7 @@ class RecordFragment : Fragment() {
     private var backswingAngleDifferences = FloatArray(5)
     private var forwardswingAngleDifferences = FloatArray(5)
     private var followthroughAngleDifferences = FloatArray(5)
+
 
     var addressResultBitmap: Bitmap? = null
     var pushawayResultBitmap: Bitmap? = null
@@ -218,6 +223,8 @@ class RecordFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -291,37 +298,13 @@ class RecordFragment : Fragment() {
                 intent.putExtra("forwardswinguri", forwardswingResultURI.toString())
                 intent.putExtra("followthroughuri", followthroughResultURI.toString())
 
-//                Log.d(TAG, "Bitmap: $pushawayResultBitmap")
-//                pushawayResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
-//                intent.putExtra("pushawaybitmap", stream1.toByteArray())
-//
-//                downswingResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
-//                intent.putExtra("downswingbitmap", stream1.toByteArray())
-//
-//                backswingResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
-//                intent.putExtra("backswingbitmap", stream1.toByteArray())
-//
-//                forwardswingResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
-//                intent.putExtra("forwardswingbitmap", stream1.toByteArray())
-//
-//                followthroughResultBitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream1)
-//                intent.putExtra("followthroughbitmap", stream1.toByteArray())
-
                 startActivity(intent)
 
                 recordButton.setImageResource(R.drawable.ic_record_btn)
             } else {
-//                MoveNet.getBitmap().clear()
-//                MoveNet.getRightAlbowAngles()[0].clear()
-//                MoveNet.getRightHipAngles()[0].clear()
-//                MoveNet.getRightKneeAngles()[0].clear()
-//                MoveNet.getRightShoulderAngles()[0].clear()
 
                 outputFile = createFile(safeContext, "mp4")
                 recorder = createRecorder(recorderSurface)
-
-//                    requestedOrientation =
-//                        ActivityInfo.SCREEN_ORIENTATION_LOCKED
 
                 relativeOrientation.value?.let { recorder.setOrientationHint(it) }
                 recorder.prepare()
@@ -581,26 +564,6 @@ class RecordFragment : Fragment() {
     private fun getAngleDifference(correctAngle: Float, myAngle: Float): Float{
         return myAngle - correctAngle
     }
-
-//    private fun getNearValue(targetList: Array<ArrayList<Float>>,
-//                             value: Float, p1: Int): Float {
-//        var temp: Float
-//        var min = Float.MAX_VALUE
-//        var nearValue = 0.0f
-//
-//        for (j in 0 .. 9) {
-//            Log.d(TAG, "getNearValue: ${targetList[p1][j]}")
-//        }
-//        val size = targetList[p1].size
-//        for (i in 0 until size) {
-//            temp = abs(targetList[p1][i] - value)
-//            if (min > temp) {
-//                min = temp
-//                nearValue = targetList[p1][i]
-//            }
-//        }
-//        return nearValue
-//    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

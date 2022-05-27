@@ -390,6 +390,7 @@ class CameraSource(
 
     }
 
+
     private fun visualize(persons: List<Person>, bitmap: Bitmap) {
 
         val outputBitmap = VisualizationUtils.drawBodyKeypoints(
