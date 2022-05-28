@@ -181,7 +181,6 @@ class ResultPopupActivity: AppCompatActivity() {
                         feedbackFollowAngleDiffernce(followthroughAngleDifferences!!)
                     }
                 }
-
             }
 
             okButton.setOnClickListener {
@@ -190,6 +189,12 @@ class ResultPopupActivity: AppCompatActivity() {
                 finish()
             }
         }
+
+    override fun onDestroy() {
+        RecordFragment.resetRecordedInfo()
+        MoveNet.resetInfo()
+        super.onDestroy()
+    }
 
 
 //    private fun setBitmap(pose: PoseType, bitmap: Bitmap, array: Array<FloatArray?>): Bitmap {
