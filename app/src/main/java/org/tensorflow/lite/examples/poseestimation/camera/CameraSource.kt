@@ -46,9 +46,11 @@ import androidx.core.content.FileProvider
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.tensorflow.lite.examples.poseestimation.*
 import org.tensorflow.lite.examples.poseestimation.data.Person
+import org.tensorflow.lite.examples.poseestimation.ml.MoveNet
 //import org.tensorflow.lite.examples.poseestimation.ml.MoveNetMultiPose
 //import org.tensorflow.lite.examples.poseestimation.ml.PoseClassifier
 import org.tensorflow.lite.examples.poseestimation.ml.PoseDetector
+import org.tensorflow.lite.examples.poseestimation.ml.bitmapArray
 //import org.tensorflow.lite.examples.poseestimation.ml.TrackerType
 import java.io.File
 import java.io.IOException
@@ -63,6 +65,8 @@ class CameraSource(
     private val listener: CameraSourceListener? = null
 ) {
 
+
+
     companion object {
         private const val PREVIEW_WIDTH = 640
         private const val PREVIEW_HEIGHT = 480
@@ -74,6 +78,15 @@ class CameraSource(
         private const val RECORDER_VIDEO_BITRATE: Int = 10_000_000
         private const val MIN_REQUIRED_RECORDING_TIME_MILLIS: Long = 1000L
 
+        var addressBodyBitmapList = ArrayList<Bitmap>()
+        var pushawayBodyBitmapList = ArrayList<Bitmap>()
+        var downswingBodyBitmapList = ArrayList<Bitmap>()
+        var backswingBodyBitmapList = ArrayList<Bitmap>()
+        var forwardswingBodyBitmapList = ArrayList<Bitmap>()
+        var followthroughBodyBitmapList = ArrayList<Bitmap>()
+
+        var bitmapBodyArray = arrayOf(addressBodyBitmapList, pushawayBodyBitmapList, downswingBodyBitmapList, backswingBodyBitmapList, forwardswingBodyBitmapList, followthroughBodyBitmapList)
+
         /** Creates a [File] named with the current date and time */
         private fun createFile(context: Context, extension: String): File {
 
@@ -83,6 +96,10 @@ class CameraSource(
                 Environment.DIRECTORY_DCIM), "VID_${sdf.format(Date())}.$extension")
 //            return  File(context.getExternalFilesDir(null), "VID_${sdf.format(Date())}.$extension")
         }
+
+        fun getBitmap(): Array<ArrayList<Bitmap>> {
+            return this.bitmapBodyArray
+        }
     }
 
     private val lock = Any()
@@ -91,10 +108,6 @@ class CameraSource(
     private var isTrackerEnabled = false
     private var yuvConverter: YuvToRgbConverter = YuvToRgbConverter(surfaceView.context)
     private lateinit var imageBitmap: Bitmap
-
-
-
-
 
     /*
 비디오 녹화 코드
@@ -386,6 +399,7 @@ class CameraSource(
         if (persons.isNotEmpty()) {
             listener?.onDetectedInfo(persons[0].score, classificationResult)
         }
+
         visualize(persons, bitmap)
 
     }
@@ -397,6 +411,20 @@ class CameraSource(
             bitmap,
             persons.filter { it.score > MIN_CONFIDENCE }, isTrackerEnabled
         )
+
+//        if(MoveNet.getTime() < 7) {
+//            addressBodyBitmapList.add(outputBitmap)
+//        } else if(MoveNet.getTime() < 14) {
+//            pushawayBodyBitmapList.add(outputBitmap)
+//        } else if(MoveNet.getTime() < 21) {
+//            downswingBodyBitmapList.add(outputBitmap)
+//        } else if(MoveNet.getTime() < 28) {
+//            backswingBodyBitmapList.add(outputBitmap)
+//        } else if(MoveNet.getTime() < 35) {
+//            forwardswingBodyBitmapList.add(outputBitmap)
+//        } else if(MoveNet.getTime() < 42) {
+//            followthroughBodyBitmapList.add(outputBitmap)
+//        }
 
         val holder = surfaceView.holder
         val surfaceCanvas = holder.lockCanvas()
@@ -428,6 +456,7 @@ class CameraSource(
             )
             surfaceView.holder.unlockCanvasAndPost(canvas)
         }
+
     }
 
     private fun stopImageReaderThread() {

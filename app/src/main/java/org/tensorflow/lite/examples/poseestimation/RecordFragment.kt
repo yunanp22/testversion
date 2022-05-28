@@ -51,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.tensorflow.lite.examples.poseestimation.camera.CameraSource
 import org.tensorflow.lite.examples.poseestimation.data.Device
+import org.tensorflow.lite.examples.poseestimation.data.Person
 import org.tensorflow.lite.examples.poseestimation.data.VowlingPose
 import org.tensorflow.lite.examples.poseestimation.ml.*
 import java.io.ByteArrayOutputStream
@@ -71,7 +72,12 @@ enum class PoseType(val pose: String) {
     FOLLOWTHROUGH("FOLLOWTHROUGH")
 }
 
+
+
 class RecordFragment : Fragment() {
+
+
+
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
@@ -90,14 +96,10 @@ class RecordFragment : Fragment() {
             return RecordFragment()
         }
 
-
         private const val PREVIEW_WIDTH = 640
         private const val PREVIEW_HEIGHT = 480
 
         private const val RECORDER_VIDEO_BITRATE: Int = 10_000_000
-
-
-
 
         /** 자세별 점수 */
         private var addressScore: Float = 0.0f
@@ -123,6 +125,22 @@ class RecordFragment : Fragment() {
         private var forwardswingResultBitmap: Bitmap? = null
         private var followthroughResultBitmap: Bitmap? = null
 
+//        private var addressBodyBitmap: Bitmap? = null
+//        private var pushawayBodyBitmap: Bitmap? = null
+//        private var downswingBodyBitmap: Bitmap? = null
+//        private var backswingBodyBitmap: Bitmap? = null
+//        private var forwardswingBodyBitmap: Bitmap? = null
+//        private var followthroughBodyBitmap: Bitmap? = null
+
+        private var addressPerson: Person? = null
+        private var pushawayPerson: Person? = null
+        private var downswingPerson: Person? = null
+        private var backswingPerson: Person? = null
+        private var forwardswingPerson: Person? = null
+        private var followthroughPerson: Person? = null
+
+//        var personList = arrayOf(addressPersonList, pushawayPersonList, downswingPersonList, backswingPersonList, forwardswingPersonList, followthroughPersonList)
+
         fun resetRecordedInfo(){
             addressScore = 0.0f
             pushawayScore = 0.0f
@@ -144,6 +162,21 @@ class RecordFragment : Fragment() {
             backswingResultBitmap = null
             forwardswingResultBitmap = null
             followthroughResultBitmap = null
+
+//            addressBodyBitmap = null
+//            pushawayBodyBitmap = null
+//            downswingBodyBitmap = null
+//            backswingBodyBitmap = null
+//            forwardswingBodyBitmap = null
+//            followthroughBodyBitmap = null
+
+            addressPerson = null
+            pushawayPerson = null
+            downswingPerson = null
+            backswingPerson = null
+            forwardswingPerson = null
+            followthroughPerson = null
+
         }
 
         fun resetArray(array: FloatArray){
@@ -152,6 +185,8 @@ class RecordFragment : Fragment() {
         }
 
     }
+
+
 
     /** Default device is CPU */
     private var device = Device.CPU
@@ -264,8 +299,6 @@ class RecordFragment : Fragment() {
         surfaceView =  view.rootView.findViewById(R.id.surfaceView)
         imgPose =  view.rootView.findViewById(R.id.imgPose)
 
-        var defaultBitmapURI = Uri.parse("android.resource://" + requireActivity().packageName + "/" + R.drawable.bowling)
-
         //Bottom Sheet 위치 설정(MainActivity의 Bottom Navigation Bar와 위치가 충돌되는 문제 예방)
         bottomSheet = view.rootView.findViewById<LinearLayoutCompat>(R.id.score_sheet)
         val behavior = BottomSheetBehavior.from(bottomSheet)
@@ -278,7 +311,6 @@ class RecordFragment : Fragment() {
             ActivityCompat.requestPermissions(
                 requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
-
 
         recordButton = view.findViewById(R.id.record_button)
         closeButton = view.findViewById(R.id.close_button)
@@ -325,6 +357,26 @@ class RecordFragment : Fragment() {
                 intent.putExtra("backswinguri", backswingResultURI.toString())
                 intent.putExtra("forwardswinguri", forwardswingResultURI.toString())
                 intent.putExtra("followthroughuri", followthroughResultURI.toString())
+
+//                val addressBodyURI = saveBodyBitmapAsFile(PoseType.ADDRESS, addressBodyBitmap)
+//                val pushawayBodyURI = saveBodyBitmapAsFile(PoseType.PUSHAWAY, pushawayBodyBitmap)
+//                val downswingBodyURI = saveBodyBitmapAsFile(PoseType.DOWNSWING, downswingBodyBitmap)
+//                val backswingBodyURI = saveBodyBitmapAsFile(PoseType.BACKSWING, backswingBodyBitmap)
+//                val forwardswingBodyURI = saveBodyBitmapAsFile(PoseType.FORWARDSWING, forwardswingBodyBitmap)
+//                val followthroughBodyURI = saveBodyBitmapAsFile(PoseType.FOLLOWTHROUGH, followthroughBodyBitmap)
+//                intent.putExtra("addressbodyuri", addressBodyURI.toString())
+//                intent.putExtra("pushawaybodyuri", pushawayBodyURI.toString())
+//                intent.putExtra("downswingbodyuri", downswingBodyURI.toString())
+//                intent.putExtra("backswingbodyuri", backswingBodyURI.toString())
+//                intent.putExtra("forwardswingbodyuri", forwardswingBodyURI.toString())
+//                intent.putExtra("followthroughbodyuri", followthroughBodyURI.toString())
+
+                intent.putExtra("addressperson", addressPerson)
+                intent.putExtra("pushawayperson", pushawayPerson)
+                intent.putExtra("downswingperson", downswingPerson)
+                intent.putExtra("backswingperson", backswingPerson)
+                intent.putExtra("forwardswingperson", forwardswingPerson)
+                intent.putExtra("followthroughperson", followthroughPerson)
 
                 startActivity(intent)
 
@@ -383,6 +435,8 @@ class RecordFragment : Fragment() {
                             }
                             addressScore = maxScore
                             addressResultBitmap = MoveNet.getBitmap()[0][maxScoreIndex]
+//                            addressBodyBitmap = CameraSource.getBitmap()[0][maxScoreIndex]
+                            addressPerson = MoveNet.getPersonList()[0][maxScoreIndex]
 
                             addressAngleDifferences[0] = getAngleDifference(pose_address.getREA(), MoveNet.getRightElbowAngles()[0][maxScoreIndex])
                             addressAngleDifferences[1] = getAngleDifference(pose_address.getRSA(), MoveNet.getRightShoulderAngles()[0][maxScoreIndex])
@@ -412,6 +466,8 @@ class RecordFragment : Fragment() {
                             }
                             pushawayScore = maxScore
                             pushawayResultBitmap = MoveNet.getBitmap()[1][maxScoreIndex]
+//                            pushawayBodyBitmap = CameraSource.getBitmap()[1][maxScoreIndex]
+                            pushawayPerson = MoveNet.getPersonList()[1][maxScoreIndex]
 
                             pushawayAngleDifferences[0] = getAngleDifference(pose_pushaway.getREA(), MoveNet.getRightElbowAngles()[1][maxScoreIndex])
                             pushawayAngleDifferences[1] = getAngleDifference(pose_pushaway.getRSA(), MoveNet.getRightShoulderAngles()[1][maxScoreIndex])
@@ -442,6 +498,8 @@ class RecordFragment : Fragment() {
                             }
                             downswingScore = maxScore
                             downswingResultBitmap = MoveNet.getBitmap()[2][maxScoreIndex]
+//                            downswingBodyBitmap = CameraSource.getBitmap()[2][maxScoreIndex]
+                            downswingPerson = MoveNet.getPersonList()[2][maxScoreIndex]
 
                             downswingAngleDifferences[0] = getAngleDifference(pose_downswing.getREA(), MoveNet.getRightElbowAngles()[2][maxScoreIndex])
                             downswingAngleDifferences[1] = getAngleDifference(pose_downswing.getRSA(), MoveNet.getRightShoulderAngles()[2][maxScoreIndex])
@@ -472,6 +530,8 @@ class RecordFragment : Fragment() {
                             }
                             backswingScore = maxScore
                             backswingResultBitmap = MoveNet.getBitmap()[3][maxScoreIndex]
+//                            backswingBodyBitmap = CameraSource.getBitmap()[3][maxScoreIndex]
+                            backswingPerson = MoveNet.getPersonList()[3][maxScoreIndex]
 
                             backswingAngleDifferences[0] = getAngleDifference(pose_backswing.getREA(), MoveNet.getRightElbowAngles()[3][maxScoreIndex])
                             backswingAngleDifferences[1] = getAngleDifference(pose_backswing.getRSA(), MoveNet.getRightShoulderAngles()[3][maxScoreIndex])
@@ -502,6 +562,8 @@ class RecordFragment : Fragment() {
                             }
                             forwardswingScore = maxScore
                             forwardswingResultBitmap = MoveNet.getBitmap()[4][maxScoreIndex]
+//                            forwardswingBodyBitmap = CameraSource.getBitmap()[4][maxScoreIndex]
+                            forwardswingPerson = MoveNet.getPersonList()[4][maxScoreIndex]
 
                             forwardswingAngleDifferences[0] = getAngleDifference(pose_forwardswing.getREA(), MoveNet.getRightElbowAngles()[4][maxScoreIndex])
                             forwardswingAngleDifferences[1] = getAngleDifference(pose_forwardswing.getRSA(), MoveNet.getRightShoulderAngles()[4][maxScoreIndex])
@@ -532,6 +594,8 @@ class RecordFragment : Fragment() {
                             }
                             followthroughScore = maxScore
                             followthroughResultBitmap = MoveNet.getBitmap()[5][maxScoreIndex]
+//                            followthroughBodyBitmap = CameraSource.getBitmap()[5][maxScoreIndex]
+                            followthroughPerson = MoveNet.getPersonList()[5][maxScoreIndex]
 
                             followthroughAngleDifferences[0] = getAngleDifference(pose_followthrough.getREA(), MoveNet.getRightElbowAngles()[5][maxScoreIndex])
                             followthroughAngleDifferences[1] = getAngleDifference(pose_followthrough.getRSA(), MoveNet.getRightShoulderAngles()[5][maxScoreIndex])
@@ -590,6 +654,32 @@ class RecordFragment : Fragment() {
         return Uri.parse(file.absolutePath)
     }
 
+    private fun saveBodyBitmapAsFile(pose: PoseType, bitmap: Bitmap?): Uri? {
+
+        val wrapper = ContextWrapper(requireActivity().applicationContext)
+
+//        val path = File(safeContext.externalCacheDir, "image")
+//        if(!path.exists()){
+//            path.mkdirs()
+//        }
+//        var path = Environment.getExternalStoragePublicDirectory(
+//            Environment.DIRECTORY_PICTURES)
+        var file = wrapper.getDir("Images", Context.MODE_PRIVATE)
+        file = File(file, "${pose.pose}Body.jpg")
+//        var imageFile: OutputStream? = null
+        try{
+            val stream: OutputStream = FileOutputStream(file)
+            bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            stream.flush()
+            stream.close()
+        }catch (e: Exception){
+            null
+//            e.message
+        }
+
+        return Uri.parse(file.absolutePath)
+    }
+
     private fun getAngleDifference(correctAngle: Float, myAngle: Float): Float{
         return myAngle - correctAngle
     }
@@ -610,8 +700,6 @@ class RecordFragment : Fragment() {
 
         return view
     }
-
-
 
     override fun onStart() {
         super.onStart()

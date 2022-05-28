@@ -80,6 +80,22 @@ class ResultPopupActivity: AppCompatActivity() {
         var followthroughBitmap = BitmapFactory.decodeFile(followthroughResultURI)
         Log.d("TAG", "addressBitmap : ${addressBitmap}")
 
+//        var addressBodyURI = intent.getStringExtra("addressbodyuri")
+//        var pushawayBodyURI = intent.getStringExtra("pushawaybodyuri")
+//        var downswingBodyURI = intent.getStringExtra("downswingbodyuri")
+//        var backswingBodyURI = intent.getStringExtra("backswingbodyuri")
+//        var forwardswingBodyURI = intent.getStringExtra("forwardswingbodyuri")
+//        var followthroughBodyURI = intent.getStringExtra("followthroughbodyuri")
+//        Log.d("TAG", "addressResultURI : ${addressResultURI}")
+
+//        var addressBodyBitmap = BitmapFactory.decodeFile(addressBodyURI)
+//        var pushawayBodyBitmap = BitmapFactory.decodeFile(pushawayBodyURI)
+//        var downswingBodyBitmap = BitmapFactory.decodeFile(downswingBodyURI)
+//        var backswingBodyBitmap = BitmapFactory.decodeFile(backswingBodyURI)
+//        var forwardswingBodyBitmap = BitmapFactory.decodeFile(forwardswingBodyURI)
+//        var followthroughBodyBitmap = BitmapFactory.decodeFile(followthroughBodyURI)
+//        Log.d("TAG", "addressBitmap : ${addressBitmap}")
+
         var addressAngleDifferences = intent.getFloatArrayExtra("addressAngleDifferences")
         var pushawayAngleDifferences = intent.getFloatArrayExtra("pushawayAngleDifferences")
         var downswingAngleDifferences = intent.getFloatArrayExtra("downswingAngleDifferences")
@@ -87,6 +103,13 @@ class ResultPopupActivity: AppCompatActivity() {
         var forwardswingAngleDifferences = intent.getFloatArrayExtra("forwardswingAngleDifferences")
         var followthroughAngleDifferences = intent.getFloatArrayExtra("followthroughAngleDifferences")
         Log.d("TAG", "addressAngleDifferences : ${addressAngleDifferences}")
+
+        var addressPerson = intent.getParcelableExtra<Person>("addressperson")
+        var pushawayPerson = intent.getParcelableExtra<Person>("pushawayperson")
+        var downswingPerson = intent.getParcelableExtra<Person>("downswingperson")
+        var backswingPerson = intent.getParcelableExtra<Person>("backswingperson")
+        var forwardswingPerson = intent.getParcelableExtra<Person>("forwardswingperson")
+        var followthroughPerson = intent.getParcelableExtra<Person>("followthroughperson")
 
         poseAngleDifferences = arrayOf(addressAngleDifferences, pushawayAngleDifferences,
             downswingAngleDifferences, backswingAngleDifferences, forwardswingAngleDifferences, followthroughAngleDifferences)
@@ -106,7 +129,9 @@ class ResultPopupActivity: AppCompatActivity() {
                     if (getSelectedSpinnerItem() == 0) {
                         comment.text = "어드레스 점수: $score1"
                         if(addressBitmap != null) {
-                            imageView.setImageBitmap(setBitmap(PoseType.ADDRESS, addressBitmap, poseAngleDifferences))
+
+                            imageView.setImageBitmap(visualize(PoseType.ADDRESS, addressPerson!!, addressBitmap, poseAngleDifferences))
+//                            setBitmap(PoseType.ADDRESS, addressBitmap, poseAngleDifferences)
                         }  else {
                             imageView.setImageResource(R.drawable.bowling)
                         }
@@ -115,7 +140,9 @@ class ResultPopupActivity: AppCompatActivity() {
                     } else if (getSelectedSpinnerItem() == 1) {
                         comment.text = "푸쉬어웨이 점수: $score2"
                         if(pushawayBitmap != null) {
-                            imageView.setImageBitmap(setBitmap(PoseType.PUSHAWAY, pushawayBitmap, poseAngleDifferences))
+                            imageView.setImageBitmap(visualize(PoseType.PUSHAWAY, pushawayPerson!!, pushawayBitmap, poseAngleDifferences))
+//                            imageView.setImageBitmap(setBitmap(PoseType.ADDRESS, addressBitmap, poseAngleDifferences))
+//                            imageView.setImageBitmap(setBitmap(PoseType.PUSHAWAY, pushawayBitmap, poseAngleDifferences))
                         } else {
                             imageView.setImageResource(R.drawable.bowling)
                         }
@@ -123,7 +150,7 @@ class ResultPopupActivity: AppCompatActivity() {
                     } else if (getSelectedSpinnerItem() == 2) {
                         comment.text = "다운스윙 점수: $score3"
                         if(downswingBitmap != null) {
-                            imageView.setImageBitmap(setBitmap(PoseType.DOWNSWING, downswingBitmap, poseAngleDifferences))
+                            imageView.setImageBitmap(visualize(PoseType.DOWNSWING, downswingPerson!!, downswingBitmap, poseAngleDifferences))
                         } else {
                             imageView.setImageResource(R.drawable.bowling)
                         }
@@ -131,7 +158,7 @@ class ResultPopupActivity: AppCompatActivity() {
                     } else if (getSelectedSpinnerItem() == 3) {
                         comment.text = "백스윙 점수: $score4"
                         if(backswingBitmap != null) {
-                            imageView.setImageBitmap(setBitmap(PoseType.BACKSWING, backswingBitmap, poseAngleDifferences))
+                            imageView.setImageBitmap(visualize(PoseType.BACKSWING, backswingPerson!!, backswingBitmap, poseAngleDifferences))
                         } else {
                             imageView.setImageResource(R.drawable.bowling)
                         }
@@ -139,7 +166,7 @@ class ResultPopupActivity: AppCompatActivity() {
                     } else if (getSelectedSpinnerItem() == 4) {
                         comment.text = "포워드 점수: $score5"
                         if(forwardswingBitmap != null) {
-                            imageView.setImageBitmap(setBitmap(PoseType.FORWARDSWING, forwardswingBitmap, poseAngleDifferences))
+                            imageView.setImageBitmap(visualize(PoseType.FORWARDSWING, forwardswingPerson!!, forwardswingBitmap, poseAngleDifferences))
                         } else {
                             imageView.setImageResource(R.drawable.bowling)
                         }
@@ -147,7 +174,7 @@ class ResultPopupActivity: AppCompatActivity() {
                     } else {
                         comment.text = "팔로우스루 점수: $score6"
                         if(followthroughBitmap != null) {
-                            imageView.setImageBitmap(setBitmap(PoseType.FOLLOWTHROUGH, followthroughBitmap, poseAngleDifferences))
+                            imageView.setImageBitmap(visualize(PoseType.FOLLOWTHROUGH, followthroughPerson!!, followthroughBitmap, poseAngleDifferences))
                         } else {
                             imageView.setImageResource(R.drawable.bowling)
                         }
@@ -157,7 +184,6 @@ class ResultPopupActivity: AppCompatActivity() {
 
             }
 
-
             okButton.setOnClickListener {
                 RecordFragment.resetRecordedInfo()
                 MoveNet.resetInfo()
@@ -166,28 +192,25 @@ class ResultPopupActivity: AppCompatActivity() {
         }
 
 
-    private fun setBitmap(pose: PoseType, bitmap: Bitmap, array: Array<FloatArray?>): Bitmap {
+//    private fun setBitmap(pose: PoseType, bitmap: Bitmap, array: Array<FloatArray?>): Bitmap {
+//
+//            val persons = mutableListOf<Person>()
+//
+//            MoveNet.create(this@ResultPopupActivity, Device.CPU, ModelType.Lightning).estimatePoses(bitmap)?.let {
+//                persons.addAll(it)
+//            }
+//
+//            return visualize(pose, persons, bitmap, array)
+//
+//    }
 
-//            val decodedBitmap = BitmapFactory.decodeByteArray(bitmap, 0, bitmap!!.size)
-
-            val persons = mutableListOf<Person>()
-
-            MoveNet.create(this@ResultPopupActivity, Device.CPU, ModelType.Lightning).estimatePoses(bitmap)?.let {
-                persons.addAll(it)
-            }
-//            Log.d("TAG", "onCreate: ${persons.size}")
-            return visualize(pose, persons, bitmap, array)
-
-    }
-
-    private fun visualize(pose: PoseType, persons: List<Person>, bitmap: Bitmap, array: Array<FloatArray?>): Bitmap {
+    private fun visualize(pose: PoseType, persons: Person, bitmap: Bitmap, array: Array<FloatArray?>): Bitmap {
 
         val outputBitmap = VisualizationUtils.drawBodyKeypointsByScore(
             pose,
             array,
             bitmap,
-            persons, false,
-            50.0f
+            persons, false
         )
 
         return outputBitmap
@@ -349,4 +372,5 @@ class ResultPopupActivity: AppCompatActivity() {
             feedback.text = "짝짝짝! 완벽한 자세에요!"
         }
     }
+
 }

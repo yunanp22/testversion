@@ -19,12 +19,16 @@ package org.tensorflow.lite.examples.poseestimation.data
 import org.tensorflow.lite.examples.poseestimation.data.KeyPoint
 import android.graphics.RectF
 import android.graphics.PointF
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.RawValue
 import kotlin.math.*
 
+@Parcelize
 data class Person(
     var id: Int = -1, // default id is -1
     val keyPoints: List<KeyPoint>,
     val boundingBox: RectF? = null, // Only MoveNet MultiPose return bounding box.
     val score: Float
-)
+) : Parcelable
 

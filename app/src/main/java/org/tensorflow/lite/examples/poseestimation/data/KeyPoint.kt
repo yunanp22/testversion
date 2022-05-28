@@ -17,5 +17,8 @@ limitations under the License.
 package org.tensorflow.lite.examples.poseestimation.data
 
 import android.graphics.PointF
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
-data class KeyPoint(val bodyPart: BodyPart, var coordinate: PointF, val score: Float)
+@Parcelize
+data class KeyPoint(val bodyPart: BodyPart, var coordinate: PointF, val score: Float)  : Parcelable

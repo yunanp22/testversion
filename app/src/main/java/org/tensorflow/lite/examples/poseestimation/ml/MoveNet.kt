@@ -79,6 +79,13 @@ var backswingBitmapList = ArrayList<Bitmap>()
 var forwardswingBitmapList = ArrayList<Bitmap>()
 var followthroughBitmapList = ArrayList<Bitmap>()
 
+var addressPersonList = ArrayList<Person>()
+var pushawayPersonList = ArrayList<Person>()
+var downswingPersonList = ArrayList<Person>()
+var backswingPersonList = ArrayList<Person>()
+var forwardswingPersonList = ArrayList<Person>()
+var followthroughPersonList = ArrayList<Person>()
+
 private var rightElbowAngles = arrayOf(rightElbowAngle1, rightElbowAngle2, rightElbowAngle3, rightElbowAngle4,
     rightElbowAngle5, rightElbowAngle6)
 
@@ -92,6 +99,8 @@ private var leftKneeAngles = arrayOf(leftKneeAngle1, leftKneeAngle2, leftKneeAng
     leftKneeAngle4, leftKneeAngle5)
 
 var bitmapArray = arrayOf(addressBitmapList, pushawayBitmapList, downswingBitmapList, backswingBitmapList, forwardswingBitmapList, followthroughBitmapList)
+
+var personListArray = arrayOf(addressPersonList, pushawayPersonList, downswingPersonList, backswingPersonList, forwardswingPersonList, followthroughPersonList)
 
 private var biggestScore = FloatArray(6)
 
@@ -161,6 +170,12 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             resetAngleArray(rightKneeAngles)
             resetAngleArray(leftKneeAngles)
             resetBitmapArray(bitmapArray)
+            resetPersonList(personListArray)
+        }
+
+        fun resetPersonList(array: Array<ArrayList<Person>>) {
+            for(i in 0 until array.size)
+                array[i].clear()
         }
 
         fun resetAngleArray(array:Array<ArrayList<Float>>){
@@ -197,8 +212,16 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             return bitmapArray
         }
 
+        fun getPersonList(): Array<ArrayList<Person>> {
+            return personListArray
+        }
+
         fun setTime(time: Int) {
             this.time = time
+        }
+
+        fun getTime(): Int {
+            return this.time
         }
     }
 
@@ -320,6 +343,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             rightHipAngles[0].add(rightHipAngle)
             rightKneeAngles[0].add(rightKneeAngle)
             addressBitmapList.add(bitmap)
+            addressPersonList.add(Person(keyPoints = keyPoints, score = 100.0f))
         }
 
         else if(time < 14) {
@@ -329,6 +353,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             rightKneeAngles[1].add(rightKneeAngle)
             leftKneeAngles[0].add(leftKneeAngle)
             pushawayBitmapList.add(bitmap)
+            pushawayPersonList.add(Person(keyPoints = keyPoints, score = 100.0f))
         }
 
         else if(time < 21) {
@@ -338,6 +363,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             rightKneeAngles[2].add(rightKneeAngle)
             leftKneeAngles[1].add(leftKneeAngle)
             downswingBitmapList.add(bitmap)
+            downswingPersonList.add(Person(keyPoints = keyPoints, score = 100.0f))
         }
 
         else if(time < 28) {
@@ -347,6 +373,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             rightKneeAngles[3].add(rightKneeAngle)
             leftKneeAngles[2].add(leftKneeAngle)
             backswingBitmapList.add(bitmap)
+            backswingPersonList.add(Person(keyPoints = keyPoints, score = 100.0f))
         }
 
         else if(time < 35) {
@@ -356,6 +383,7 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             rightKneeAngles[4].add(rightKneeAngle)
             leftKneeAngles[3].add(leftKneeAngle)
             forwardswingBitmapList.add(bitmap)
+            forwardswingPersonList.add(Person(keyPoints = keyPoints, score = 100.0f))
         }
 
         else if(time < 42){
@@ -365,10 +393,12 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
             rightKneeAngles[5].add(rightKneeAngle)
             leftKneeAngles[4].add(leftKneeAngle)
             followthroughBitmapList.add(bitmap)
+            followthroughPersonList.add(Person(keyPoints = keyPoints, score = 100.0f))
         }
 
-        return listOf(Person(keyPoints = keyPoints, score = 100.0f))
 
+
+        return listOf(Person(keyPoints = keyPoints, score = 100.0f))
     }
 
 
