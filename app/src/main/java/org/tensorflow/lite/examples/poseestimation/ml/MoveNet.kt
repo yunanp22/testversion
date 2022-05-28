@@ -86,19 +86,20 @@ var backswingPersonList = ArrayList<Person>()
 var forwardswingPersonList = ArrayList<Person>()
 var followthroughPersonList = ArrayList<Person>()
 
-private var rightElbowAngles = arrayOf(rightElbowAngle1, rightElbowAngle2, rightElbowAngle3, rightElbowAngle4,
-    rightElbowAngle5, rightElbowAngle6)
+private var rightElbowAngles = arrayOf(rightElbowAngle1, rightElbowAngle2, rightElbowAngle3,
+    rightElbowAngle4, rightElbowAngle5, rightElbowAngle6)
 
 private var rightShoulderAngles = arrayOf(rightShoulderAngle1, rightShoulderAngle2, rightShoulderAngle3,
     rightShoulderAngle4, rightShoulderAngle5, rightShoulderAngle6)
-private var rightHipAngles = arrayOf(rightHipAngle1, rightHipAngle2, rightHipAngle3, rightHipAngle4,
-    rightHipAngle5, rightHipAngle6)
-private var rightKneeAngles = arrayOf(rightKneeAngle1, rightKneeAngle2, rightKneeAngle3, rightKneeAngle4,
-    rightKneeAngle5, rightKneeAngle6)
+private var rightHipAngles = arrayOf(rightHipAngle1, rightHipAngle2, rightHipAngle3,
+    rightHipAngle4, rightHipAngle5, rightHipAngle6)
+private var rightKneeAngles = arrayOf(rightKneeAngle1, rightKneeAngle2, rightKneeAngle3,
+    rightKneeAngle4, rightKneeAngle5, rightKneeAngle6)
 private var leftKneeAngles = arrayOf(leftKneeAngle1, leftKneeAngle2, leftKneeAngle3,
     leftKneeAngle4, leftKneeAngle5)
 
-var bitmapArray = arrayOf(addressBitmapList, pushawayBitmapList, downswingBitmapList, backswingBitmapList, forwardswingBitmapList, followthroughBitmapList)
+var bitmapArray = arrayOf(addressBitmapList, pushawayBitmapList, downswingBitmapList,
+    backswingBitmapList, forwardswingBitmapList, followthroughBitmapList)
 
 var personListArray = arrayOf(addressPersonList, pushawayPersonList, downswingPersonList, backswingPersonList, forwardswingPersonList, followthroughPersonList)
 
@@ -311,17 +312,22 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
 //        Log.d("TAG", "setTime: $time")
 
         /** 부위별 각도*/
-        val rightElbowAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate, keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate,keyPoints[BodyPart.RIGHT_WRIST.position].coordinate)
-        val rightShoulderAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate, keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,keyPoints[BodyPart.RIGHT_HIP.position].coordinate)
-        val rightHipAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,keyPoints[BodyPart.RIGHT_HIP.position].coordinate,keyPoints[BodyPart.RIGHT_KNEE.position].coordinate)
-        val leftKneeAngleArray = arrayOf(keyPoints[BodyPart.LEFT_HIP.position].coordinate,keyPoints[BodyPart.LEFT_KNEE.position].coordinate,keyPoints[BodyPart.LEFT_ANKLE.position].coordinate)
-        val rightKneeAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_HIP.position].coordinate,keyPoints[BodyPart.RIGHT_KNEE.position].coordinate,keyPoints[BodyPart.RIGHT_ANKLE.position].coordinate)
+        val rightElbowAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,
+            keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate,keyPoints[BodyPart.RIGHT_WRIST.position].coordinate)
+        val rightShoulderAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_ELBOW.position].coordinate,
+            keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,keyPoints[BodyPart.RIGHT_HIP.position].coordinate)
+        val rightHipAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_SHOULDER.position].coordinate,
+            keyPoints[BodyPart.RIGHT_HIP.position].coordinate,keyPoints[BodyPart.RIGHT_KNEE.position].coordinate)
+        val leftKneeAngleArray = arrayOf(keyPoints[BodyPart.LEFT_HIP.position].coordinate,
+            keyPoints[BodyPart.LEFT_KNEE.position].coordinate,keyPoints[BodyPart.LEFT_ANKLE.position].coordinate)
+        val rightKneeAngleArray = arrayOf(keyPoints[BodyPart.RIGHT_HIP.position].coordinate,
+            keyPoints[BodyPart.RIGHT_KNEE.position].coordinate,keyPoints[BodyPart.RIGHT_ANKLE.position].coordinate)
+
         val rightElbowAngle = getAngle(rightElbowAngleArray)
         val rightShoulderAngle = getAngle(rightShoulderAngleArray)
         val rightHipAngle = getAngle(rightHipAngleArray)
         val leftKneeAngle = getAngle(leftKneeAngleArray)
         val rightKneeAngle = getAngle(rightKneeAngleArray)
-
 
         /** 각 자세 인스턴스 생성*/
         val pose_address = VowlingPose(90.0f, 0.0f, 160.0f, 160.0f)
@@ -330,10 +336,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         val pose_backswing = VowlingPose(180.0f, 60.0f, 110.0f, 130.0f, 130.0f)
         val pose_forwardswing = VowlingPose(180.0f, 30.0f, 175.0f, 170.0f, 80.0f)
         val pose_followthrough = VowlingPose(160.0f, 160.0f, 175.0f, 180.0f, 100.0f)
-
-        /** 각 자세 점수*/
-
-
 
         if(time < 7) {
 
@@ -401,7 +403,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         return listOf(Person(keyPoints = keyPoints, score = 100.0f))
     }
 
-
     fun getAngle(angleArray: Array<PointF>): Float {
         val p1: Float = hypot(((angleArray[0].x) - (angleArray[1].x)), ((angleArray[0].y) - (angleArray[1].y)))
         val p2: Float = hypot(((angleArray[1].x) - (angleArray[2].x)), ((angleArray[1].y) - (angleArray[2].y)))
@@ -409,7 +410,6 @@ class MoveNet(private val interpreter: Interpreter, private var gpuDelegate: Gpu
         val radian: Float = acos((p1 * p1 + p2 * p2 - p3 * p3) / (2 * p1 * p2))
         return radian / PI.toFloat() * 180.0f
     }
-
 
     override fun lastInferenceTimeNanos(): Long = lastInferenceTimeNanos
 
