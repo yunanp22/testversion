@@ -75,8 +75,7 @@
                     android:id="@+id/result_comment_image"
                     android:layout_width="50dp"
                     android:layout_height="30dp"
-                    android:scaleType="fitStart"
-                    android:src="@drawable/result_warning" />
+                    android:scaleType="fitStart" />
             </androidx.cardview.widget.CardView>
 
             <TextView
